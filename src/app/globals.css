@@ -1,0 +1,225 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme inline {
+    --font-heading: var(--font-head);
+    --font-sans: var(--font-body);
+    --color-gold: var(--gold);
+    --color-gold-light: var(--gold-light);
+    --color-gold-deep: var(--gold-deep);
+    --color-navy-deep: var(--navy-deep);
+    --color-success: var(--success);
+    --color-warning: var(--warning);
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+    /* GoldGram: cream paper, navy ink, gold accent. No dark theme (docs/SPEC.md AC-21). */
+    --background: #F7F4EF;
+    --foreground: #20242E;
+    --card: #FFFFFF;
+    --card-foreground: #20242E;
+    --popover: #FFFFFF;
+    --popover-foreground: #20242E;
+    --primary: #192E5D;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F1EBDF;
+    --secondary-foreground: #0E1B32;
+    --muted: #F1ECE3;
+    /* 5.6:1 on the cream background, 6.3:1 on white */
+    --muted-foreground: #5E6472;
+    --accent: #F6EEDC;
+    --accent-foreground: #0E1B32;
+    --destructive: #B6483A;
+    --border: #E8E1D6;
+    --input: #D9CFBE;
+    --ring: #C6A362;
+    --gold: #C6A362;
+    --gold-light: #E7D2A0;
+    --gold-deep: #8A6A2F;
+    --navy-deep: #0E1B32;
+    --success: #2F7D4F;
+    --warning: #8F6212;
+    --chart-1: #C6A362;
+    --chart-2: #192E5D;
+    --chart-3: #2F7D4F;
+    --chart-4: #8F6212;
+    --chart-5: #B6483A;
+    --radius: 0.75rem;
+    --sidebar: #12244B;
+    --sidebar-foreground: #C9D1E4;
+    --sidebar-primary: #C6A362;
+    --sidebar-primary-foreground: #0E1B32;
+    --sidebar-accent: rgb(231 210 160 / 0.13);
+    --sidebar-accent-foreground: #F0DDB0;
+    --sidebar-border: rgb(255 255 255 / 0.08);
+    --sidebar-ring: #C6A362;
+    /* Fonts (docs/SPEC.md section 2): English Lora headings and numbers, Poppins body. */
+    --font-body: var(--font-poppins), var(--font-cairo), system-ui, sans-serif;
+    --font-head: var(--font-lora), var(--font-almarai), Georgia, serif;
+    --font-number: var(--font-lora), Georgia, serif;
+}
+
+/* Arabic: Almarai headings, Cairo body, Lora digits everywhere. */
+html[lang="ar"] {
+    --font-body: var(--font-lora-digits), var(--font-cairo), system-ui, sans-serif;
+    --font-head: var(--font-lora-digits), var(--font-almarai), system-ui, sans-serif;
+    --font-number: var(--font-lora), var(--font-cairo), Georgia, serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    scrollbar-width: thin;
+    scrollbar-color: #D9CDB6 transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+  h1, h2, h3 {
+    @apply font-heading text-secondary-foreground;
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  ::selection {
+    background: var(--gold-light);
+    color: var(--navy-deep);
+  }
+  input, select, textarea {
+    caret-color: var(--gold-deep);
+    accent-color: var(--gold-deep);
+  }
+  /* No browser-drawn controls: number fields lose their spinner arrows. */
+  input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  /* Every scrolling region takes the brand's thin scrollbar, never the browser's default. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #D9CDB6 transparent;
+  }
+  /* The sidebar scrolls when the window is short, without drawing a scrollbar over the navy. */
+  [data-slot="sidebar"] * {
+    scrollbar-width: none;
+  }
+}
+
+/* Amounts: Lora, with digits of equal width so columns line up. */
+@utility num {
+  font-family: var(--font-number);
+  font-variant-numeric: lining-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* A field the browser filled in keeps the page's colours, not the browser's yellow. */
+input:-webkit-autofill {
+  -webkit-text-fill-color: var(--foreground);
+  box-shadow: 0 0 0 1000px var(--card) inset;
+}
+
+/* A table on a phone: no sideways scrolling. The header row is kept for screen readers only, each
+   row is a block, and each cell is a line with its column's heading (data-label) at the start. */
+@media (max-width: 639px) {
+  table[data-stack] thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  table[data-stack],
+  table[data-stack] tbody,
+  table[data-stack] tr,
+  table[data-stack] td {
+    display: block;
+    width: 100%;
+  }
+  table[data-stack] tr {
+    padding-block: 10px;
+  }
+  table[data-stack] td {
+    position: relative;
+    min-height: 32px;
+    padding-block: 5px;
+    white-space: normal;
+    text-align: start;
+  }
+  table[data-stack] td[data-label]:not([data-label=""]) {
+    padding-inline-start: 42%;
+  }
+  table[data-stack] td[data-label]:not([data-label=""])::before {
+    content: attr(data-label);
+    position: absolute;
+    inset-inline-start: 16px;
+    top: 7px;
+    width: calc(42% - 28px);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  /* the first cell is what the row is: it leads, without a label */
+  table[data-stack] td[data-label]:first-child {
+    padding-inline-start: 16px;
+    font-size: 15px;
+  }
+  table[data-stack] td[data-label]:first-child::before {
+    content: none;
+  }
+}
