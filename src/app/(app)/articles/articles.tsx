@@ -8,7 +8,8 @@ import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { isRowClick } from "@/components/link-row";
 import { Confirm, Modal } from "@/components/modal";
-import { EmptyRow, FormGrid, SelectField, Status, TableCard, TextAreaField, TextField } from "@/components/parts";
+import { EmptyRow, FormGrid, SelectField, Status, TableCard, TextField } from "@/components/parts";
+import { RichTextEditor } from "@/components/rich-text";
 import { toast } from "@/components/toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { errorMessage, readResponse } from "@/lib/api";
@@ -74,6 +75,25 @@ export function Articles({ items }: { items: AdminArticle[] }) {
       { done: editing ? "Article saved" : "Article added", labels: LABELS },
     );
     if (done) setOpen(null);
+  }
+
+  /** Uploads a picture for the editor and returns the URL of the new image, or null when it failed. */
+  async function insertImage(file: File) {
+    if (!editing) return null;
+    if (!PHOTO_TYPES.includes(file.type)) { toast("Choose a JPEG, PNG or WebP picture"); return null; }
+    if (file.size > PHOTO_MAX_BYTES) { toast("The picture is larger than 2 MB"); return null; }
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const article = await readResponse<{ imageIds: number[] }>(await fetch(`/api/admin/articles/${editing.id}/images`, { method: "POST", credentials: "same-origin", body }));
+      const added = article.imageIds.filter((id) => !editing.imageIds.includes(id)).pop();
+      if (added === undefined) return null;
+      router.refresh();
+      return `/api/articles/${editing.id}/images/${added}`;
+    } catch (error) {
+      toast(errorMessage(error, LABELS));
+      return null;
+    }
   }
 
   async function upload(event: ChangeEvent<HTMLInputElement>) {
@@ -183,8 +203,8 @@ export function Articles({ items }: { items: AdminArticle[] }) {
               </SelectField>
             </FormGrid>
             <div className="grid gap-4 sm:grid-cols-2">
-              <TextAreaField label="Content (English)" name="bodyEn" defaultValue={editing?.bodyEn} rows={8} />
-              <TextAreaField label="Content (Arabic)" name="bodyAr" defaultValue={editing?.bodyAr} rows={8} dir="rtl" />
+              <RichTextEditor label="Content (English)" name="bodyEn" value={editing?.bodyEn ?? ""} onInsertImage={editing ? insertImage : undefined} imageHint="Save the article first, then add images" />
+              <RichTextEditor label="Content (Arabic)" name="bodyAr" value={editing?.bodyAr ?? ""} dir="rtl" onInsertImage={editing ? insertImage : undefined} imageHint="Save the article first, then add images" />
             </div>
             <div className="flex flex-wrap gap-2">
               <Button type="submit" variant="gold" disabled={busy}>
