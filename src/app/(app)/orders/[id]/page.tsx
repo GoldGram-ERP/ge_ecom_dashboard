@@ -197,6 +197,36 @@ export default async function OrderPage(props: PageProps<"/orders/[id]">) {
               )}
             </CardContent>
           </Card>
+          {order.kycDocument && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-heading text-lg"><T>KYC document</T></CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap items-start gap-4">
+                {/* Staff only: the address needs the admin session. Opens full size in a new tab. */}
+                <a href={`/api/admin/orders/${order.id}/kyc-document`} target="_blank" rel="noreferrer" className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+                  <Image
+                    unoptimized
+                    src={`/api/admin/orders/${order.id}/kyc-document`}
+                    alt={`KYC document of order ${order.id}`}
+                    width={220}
+                    height={320}
+                    className="h-auto max-h-80 w-55 rounded-lg bg-muted object-contain ring-1 ring-foreground/10"
+                  />
+                </a>
+                <div className="grid gap-2 text-sm">
+                  <span className="text-muted-foreground"><T>Uploaded by the customer with the order.</T></span>
+                  <Button variant="outline" size="sm" className="w-fit" asChild>
+                    <a href={`/api/admin/orders/${order.id}/kyc-document`} target="_blank" rel="noreferrer">
+                      <T>Open full size</T>
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          )}
           <Card className="pb-0">
             <CardHeader>
               <CardTitle className="font-heading text-lg"><T>Items</T></CardTitle>

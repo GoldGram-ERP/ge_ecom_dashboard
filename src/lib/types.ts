@@ -20,12 +20,16 @@ export interface Settings {
   tolerancePct: number;
   paidPeriodMinutes: number;
   kycEnabled: boolean;
+  requireKycDocPerOrder: boolean;
   requireStock: boolean;
   showOutOfStockHome: boolean;
   showOutOfStockShop: boolean;
   spreadVisible: boolean;
   deliveryDaysVisible: boolean;
   branchPickup: boolean;
+  /** Cashback per gram when GoldGram buys back a piece of a brand it sells: original packaging with the invoice, and opened. */
+  sellCashbackSealedPiastres: number;
+  sellCashbackOpenedPiastres: number;
 }
 
 export interface MasterPrice {
@@ -149,6 +153,7 @@ export interface OrderDetail extends OrderRow {
   /** When the customer sent their payment proof; the picture is at `/api/admin/orders/:id/proof`. */
   proofUploadedAt?: string | null;
   /** Every transfer picture, oldest first, with the order total each one paid up to. */
+  kycDocument?: boolean;
   proofs?: { id: number; uploadedAt: string; forTotalPiastres: number | null }[];
   /** What the transfers cover; null before the first picture. */
   paidPiastres?: number | null;
@@ -394,6 +399,11 @@ export interface SellRequest {
   karat: number;
   weightGrams: number;
   qty: number;
+  /** The product sold back when it is a brand GoldGram sells; null for another brand. */
+  productId: number | null;
+  /** That brand's name; empty for another brand. */
+  brand: string;
+  cashbackGramPiastres: number;
   condition: "sealed_invoice" | "sealed" | "opened";
   handover: "branch" | "courier";
   payout: "cash" | "instapay" | "bank";
@@ -414,4 +424,29 @@ export interface SellRequestList {
   total: number;
   page: number;
   pageSize: number;
+}
+
+export type ArticleType = "financial" | "educational" | "news" | "guide";
+
+export interface AdminArticle {
+  id: number;
+  titleEn: string;
+  titleAr: string;
+  type: ArticleType;
+  bodyEn: string;
+  bodyAr: string;
+  published: boolean;
+  publishedAt: string;
+  sortOrder: number;
+  imageIds: number[];
+}
+
+export interface AdminFaqItem {
+  id: number;
+  questionEn: string;
+  questionAr: string;
+  answerEn: string;
+  answerAr: string;
+  active: boolean;
+  sortOrder: number;
 }

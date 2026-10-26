@@ -39,6 +39,7 @@ export default async function SellRequestPage(props: PageProps<"/sell-requests/[
   // Each line: what it is, and its value (the words go through <T>; names, numbers and emails stay as they are).
   const piece: [string, string][] = [
     ["Piece", SELL_KIND[request.kind]],
+    ["Brand", request.brand || "Another brand"],
     ["Karat", `${request.karat}K`],
     ["Weight", `${formatNumber(request.weightGrams)} g`],
     ["Quantity", String(request.qty)],
@@ -83,6 +84,10 @@ export default async function SellRequestPage(props: PageProps<"/sell-requests/[
             <div className={LINE}>
               <span className="text-sm text-muted-foreground"><T>Sell price per gram (EGP)</T></span>
               <span className="num">{formatEgp(request.gramPiastres)}</span>
+            </div>
+            <div className={LINE}>
+              <span className="text-sm text-muted-foreground"><T>Cashback per gram (EGP)</T></span>
+              <span className="num">{formatEgp(request.cashbackGramPiastres)}</span>
             </div>
           </CardContent>
         </Card>

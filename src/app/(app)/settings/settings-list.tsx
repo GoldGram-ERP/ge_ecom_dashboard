@@ -6,13 +6,17 @@ import { T, useT } from "@/components/t";
 import { Switch } from "@/components/switch";
 import { toast } from "@/components/toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { moneyParseMessage, parseEgpToPiastres, piastresToInput } from "@/lib/money";
 import type { Settings } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
 
-type SwitchKey = Exclude<keyof Settings, "tolerancePct" | "paidPeriodMinutes">;
+type NumberKey = "tolerancePct" | "paidPeriodMinutes";
+type MoneyKey = "sellCashbackSealedPiastres" | "sellCashbackOpenedPiastres";
+type SwitchKey = Exclude<keyof Settings, NumberKey | MoneyKey>;
 type Row =
   | { key: SwitchKey; kind: "switch"; label: string; hint: string }
-  | { key: "tolerancePct" | "paidPeriodMinutes"; kind: "number"; label: string; hint: string; unit: string };
+  | { key: NumberKey; kind: "number"; label: string; hint: string; unit: string }
+  | { key: MoneyKey; kind: "money"; label: string; hint: string; unit: string };
 
 // The file's SET, with the setting names of SPEC section 3.7.
 const GROUPS: [string, Row[]][] = [
@@ -30,6 +34,7 @@ const GROUPS: [string, Row[]][] = [
     "Compliance and catalog",
     [
       { key: "kycEnabled", kind: "switch", label: "KYC enabled", hint: "Customers must be verified before they transact" },
+      { key: "requireKycDocPerOrder", kind: "switch", label: "KYC document on every order", hint: "Customers must upload an ID document before each order can be placed" },
       { key: "requireStock", kind: "switch", label: "Require stock", hint: "Block purchase when stock is empty" },
       { key: "showOutOfStockHome", kind: "switch", label: "Show out-of-stock on Home", hint: "" },
       { key: "showOutOfStockShop", kind: "switch", label: "Show out-of-stock in Shop", hint: "" },
@@ -42,11 +47,18 @@ const GROUPS: [string, Row[]][] = [
       { key: "deliveryDaysVisible", kind: "switch", label: "Delivery days visibility", hint: "Show estimated delivery days" },
     ],
   ],
+  [
+    "Buying gold from customers",
+    [
+      { key: "sellCashbackSealedPiastres", kind: "money", label: "Cashback, original packaging with the invoice", hint: "Per gram, for a piece of a brand we sell", unit: "EGP / g" },
+      { key: "sellCashbackOpenedPiastres", kind: "money", label: "Cashback, packaging opened", hint: "Per gram, for a piece of a brand we sell", unit: "EGP / g" },
+    ],
+  ],
 ];
 
 const LABELS = Object.fromEntries(GROUPS.flatMap(([, rows]) => rows.map((row) => [row.key, row.label])));
 
-/** The three cards of the file's V.settings. Each switch and field saves as it changes. */
+/** The cards of the file's V.settings, and the buy-back cashback. Each switch and field saves as it changes. */
 export function SettingsList({ settings }: { settings: Settings }) {
   const t = useT();
   const { busy, send } = useSend();
@@ -75,6 +87,23 @@ export function SettingsList({ settings }: { settings: Settings }) {
                         send("PATCH", "/admin/settings", { [row.key]: !settings[row.key] }, { labels: LABELS });
                       }}
                     />
+                  ) : row.kind === "money" ? (
+                    <span className="flex shrink-0 items-center gap-2">
+                      <InlineNumber
+                        value={piastresToInput(settings[row.key])}
+                        label={`${t(row.label)} (${t(row.unit)})`}
+                        width={84}
+                        onCommit={async (text) => {
+                          const amount = parseEgpToPiastres(text);
+                          if (!amount.ok) {
+                            toast(moneyParseMessage(amount.reason));
+                            return false;
+                          }
+                          return send("PATCH", "/admin/settings", { [row.key]: amount.piastres }, { labels: LABELS });
+                        }}
+                      />
+                      <span className="text-xs text-muted-foreground"><T>{row.unit}</T></span>
+                    </span>
                   ) : (
                     <span className="flex shrink-0 items-center gap-2">
                       <InlineNumber
