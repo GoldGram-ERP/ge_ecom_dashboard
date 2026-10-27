@@ -15,6 +15,7 @@ import { formatEgp, parseEgpToPiastres, piastresToInput } from "@/lib/money";
 import { buildHref } from "@/lib/query";
 import type { DeliveryMethod, Zone } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = {
   nameEn: "Name (EN)",
@@ -39,6 +40,7 @@ export function DeliveryMethods({
   ar: boolean;
 }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<DeliveryMethod | null>(null);
   const close = () => {
@@ -115,6 +117,7 @@ export function DeliveryMethods({
   return (
     <>
       <div className="flex flex-wrap justify-end gap-2">
+        {can("geography:add") ? (
         <Button type="button" variant="gold" aria-expanded={adding} onClick={() => {
             setEditing(null);
             setAdding(!adding);
@@ -122,6 +125,7 @@ export function DeliveryMethods({
           {adding ? <X aria-hidden="true" /> : <Plus aria-hidden="true" />}
           <T>{adding ? "Close form" : "Add delivery method"}</T>
         </Button>
+        ) : null}
       </div>
       {adding ? (
         <Card>
@@ -189,7 +193,7 @@ export function DeliveryMethods({
                   <TableCell className="text-end">
                     <RowActions label={`Actions for ${(ar && item.nameAr) || item.nameEn}`}>
                       <RowAction
-                        label="Edit"
+                        label="Edit" need="geography:edit"
                         icon={<Pencil aria-hidden="true" />}
                         disabled={busy}
                         onSelect={() => {
@@ -198,7 +202,7 @@ export function DeliveryMethods({
                         }}
                       />
                       <RowActionsSeparator />
-                      <RowAction label="Delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
+                      <RowAction label="Delete" need="geography:delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
                     </RowActions>
                   </TableCell>
                 </TableRow>

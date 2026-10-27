@@ -14,6 +14,7 @@ import type { CustomerList } from "@/lib/types";
 import { downloadXlsx } from "@/lib/xlsx";
 import { CustomerForm } from "./customer-form";
 import { type CustomerQuery, customersApiQuery, customersHref, DOCUMENT_STATUSES } from "./href";
+import { usePermissions } from "@/lib/permissions";
 
 /**
  * The row above the customer table: Filters, New customer, Export, Refresh, and the filters
@@ -21,6 +22,7 @@ import { type CustomerQuery, customersApiQuery, customersHref, DOCUMENT_STATUSES
  */
 export function CustomerTools({ query }: { query: CustomerQuery }) {
   const router = useRouter();
+  const { can } = usePermissions();
   const filtered = Boolean(query.name || query.email || query.phone || query.doc);
   const [open, setOpen] = useState(filtered);
   const [creating, setCreating] = useState(false);
@@ -66,10 +68,12 @@ export function CustomerTools({ query }: { query: CustomerQuery }) {
           <SlidersHorizontal />
           <T>Filters</T>
         </Button>
+        {can("customers:add") ? (
         <Button variant="gold" onClick={() => setCreating(true)}>
           <UserPlus />
           <T>New customer</T>
         </Button>
+        ) : null}
         <Button variant="outline" disabled={exporting} onClick={exportExcel}>
           <Download />
           <T>Export to Excel</T>

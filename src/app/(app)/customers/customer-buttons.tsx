@@ -17,9 +17,10 @@ export function CustomerButtons({ id, name, suspended }: { id: number; name: str
         <RowAction label="View customer" icon={<Eye />} href={`/customers/${id}`} />
         <RowAction label="Documents" icon={<IdCard />} href={`/customers/${id}?tab=documents`} />
         <RowAction label="Orders" icon={<ShoppingCart />} href={`/customers/${id}?tab=orders`} />
-        <RowAction label="Edit" icon={<Pencil />} href={`/customers/${id}?tab=edit`} />
+        <RowAction label="Edit" need="customers:edit" icon={<Pencil />} href={`/customers/${id}?tab=edit`} />
         <RowActionsSeparator />
         <RowAction
+          need="customers:edit"
           label={suspended ? "Activate" : "Suspend"}
           icon={suspended ? <Check /> : <Ban />}
           danger={!suspended}
@@ -30,7 +31,7 @@ export function CustomerButtons({ id, name, suspended }: { id: number; name: str
             })
           }
         />
-        <RowAction label="Delete" icon={<Trash2 />} danger disabled={busy} onSelect={() => setAskDelete(true)} />
+        <RowAction label="Delete" need="customers:delete" icon={<Trash2 />} danger disabled={busy} onSelect={() => setAskDelete(true)} />
       </RowActions>
       {askDelete ? (
         <Confirm

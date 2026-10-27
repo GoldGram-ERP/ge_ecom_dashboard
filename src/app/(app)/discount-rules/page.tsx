@@ -1,4 +1,5 @@
 import { T } from "@/components/t";
+import { Can } from "@/lib/permissions";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/animate-ui/components/buttons/button";
@@ -26,12 +27,12 @@ export default async function DiscountRulesPage(props: PageProps<"/discount-rule
         from the dates and the on/off switch.</T>
       </Intro>
       <div className="flex flex-wrap justify-end gap-2">
-        <Button variant="gold" asChild>
+        <Can p="discount_rules:add"><Button variant="gold" asChild>
           <Link href="/discount-rules/new">
             <Plus aria-hidden="true" />
             <T>New rule</T>
           </Link>
-        </Button>
+        </Button></Can>
       </div>
       <CountCards
         current={filter}

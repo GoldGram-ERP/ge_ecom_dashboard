@@ -9,6 +9,7 @@ import { EmptyRow, Note, SelectField, Status, TableCard, TextAreaField, TextFiel
 import { toast } from "@/components/toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 /** The rewritten texts, as the backend holds them: a null language keeps the built-in wording. */
 export type Saved = Record<string, { en: string | null; ar: string | null }>;
@@ -25,6 +26,7 @@ export function TextsTable({
   saved: Saved;
 }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const keys = Object.keys(defaults.en);
   const sections = [...new Set(keys.map((key) => key.split(".")[0]))];
   const [section, setSection] = useState(sections[0] ?? "");
@@ -111,10 +113,12 @@ export function TextsTable({
                     {now(key, "ar")}
                   </TableCell>
                   <TableCell className="text-end align-top">
+                    {can("site_texts:edit") ? (
                     <Button type="button" variant="outline" className="bg-card" aria-label={`Edit ${key}`} onClick={() => setEditing(key)}>
                       <Pencil aria-hidden="true" />
                       <T>Edit</T>
                     </Button>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))

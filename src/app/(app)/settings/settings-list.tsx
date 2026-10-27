@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { moneyParseMessage, parseEgpToPiastres, piastresToInput } from "@/lib/money";
 import type { Settings } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 type NumberKey = "tolerancePct" | "paidPeriodMinutes";
 type MoneyKey = "sellCashbackSealedPiastres" | "sellCashbackOpenedPiastres";
@@ -62,6 +63,7 @@ const LABELS = Object.fromEntries(GROUPS.flatMap(([, rows]) => rows.map((row) =>
 export function SettingsList({ settings }: { settings: Settings }) {
   const t = useT();
   const { busy, send } = useSend();
+  const { can } = usePermissions();
 
   return (
     <div className="grid max-w-3xl gap-5">
@@ -82,6 +84,7 @@ export function SettingsList({ settings }: { settings: Settings }) {
                     <Switch
                       on={settings[row.key]}
                       label={row.label}
+                      locked={!can("settings:edit")}
                       onToggle={() => {
                         if (busy) return;
                         send("PATCH", "/admin/settings", { [row.key]: !settings[row.key] }, { labels: LABELS });

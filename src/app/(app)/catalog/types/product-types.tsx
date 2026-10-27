@@ -14,12 +14,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { buildHref } from "@/lib/query";
 import type { ProductType } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = { nameEn: "Name (EN)", nameAr: "الاسم (AR)" };
 
 /** The "Product types" tab of the file's V.cats. */
 export function ProductTypes({ items, filter, ar }: { items: ProductType[]; filter: string; ar: boolean }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<ProductType | null>(null);
   const close = () => {
@@ -74,6 +76,7 @@ export function ProductTypes({ items, filter, ar }: { items: ProductType[]; filt
   return (
     <>
       <div className="flex flex-wrap justify-end gap-2">
+        {can("product_types:add") ? (
         <Button type="button" variant="gold" aria-expanded={adding} onClick={() => {
             setEditing(null);
             setAdding(!adding);
@@ -81,6 +84,7 @@ export function ProductTypes({ items, filter, ar }: { items: ProductType[]; filt
           {adding ? <X aria-hidden="true" /> : <Plus aria-hidden="true" />}
           <T>{adding ? "Close form" : "Add product type"}</T>
         </Button>
+        ) : null}
       </div>
       {adding ? (
         <Card>
@@ -124,7 +128,7 @@ export function ProductTypes({ items, filter, ar }: { items: ProductType[]; filt
                 <TableCell className="text-end">
                   <RowActions label={`Actions for ${(ar && item.nameAr) || item.nameEn}`}>
                     <RowAction
-                      label="Edit"
+                      label="Edit" need="product_types:edit"
                       icon={<Pencil aria-hidden="true" />}
                       disabled={busy}
                       onSelect={() => {
@@ -133,7 +137,7 @@ export function ProductTypes({ items, filter, ar }: { items: ProductType[]; filt
                       }}
                     />
                     <RowActionsSeparator />
-                    <RowAction label="Delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
+                    <RowAction label="Delete" need="product_types:delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
                   </RowActions>
                 </TableCell>
               </TableRow>

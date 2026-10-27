@@ -22,6 +22,7 @@ import { buildHref } from "@/lib/query";
 import type { Category, Manufacturer, Product, ProductType } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
 import { downloadXlsx } from "@/lib/xlsx";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = {
   nameEn: "Name (EN)",
@@ -62,6 +63,7 @@ export function Products({
   ar: boolean;
 }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [adding, setAdding] = useState(false);
   const router = useRouter();
   // One product's dialog: it opens on "View", and nothing can be typed before "Edit" is chosen.
@@ -299,6 +301,7 @@ export function Products({
           <Download aria-hidden="true" />
           <T>Export to Excel</T>
         </Button>
+        {can("products:add") ? (
         <Button type="button" variant="gold" aria-expanded={adding} onClick={() => {
             setOpen(null);
             setAdding(!adding);
@@ -306,6 +309,7 @@ export function Products({
           {adding ? <X aria-hidden="true" /> : <Plus aria-hidden="true" />}
           <T>{adding ? "Close form" : "Add product"}</T>
         </Button>
+        ) : null}
       </div>
       {adding ? (
         <Card>
@@ -319,6 +323,7 @@ export function Products({
           onClose={close}
           actions={
             <>
+              {can("products:add") ? (
               <Button
                 type="button"
                 variant="outline"
@@ -332,6 +337,8 @@ export function Products({
                 <Plus aria-hidden="true" />
                 <T>Create new</T>
               </Button>
+              ) : null}
+              {can("products:edit") ? (
               <Button
                 type="button"
                 variant="outline"
@@ -345,10 +352,13 @@ export function Products({
                 <RefreshCw aria-hidden="true" />
                 <T>Toggle status</T>
               </Button>
+              ) : null}
+              {can("products:delete") ? (
               <Button type="button" variant="outline" size="sm" className="bg-card text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={busy} onClick={() => setDeleting(opened)}>
                 <Trash2 aria-hidden="true" />
                 <T>Delete</T>
               </Button>
+              ) : null}
             </>
           }
         >
@@ -540,13 +550,13 @@ export function Products({
                 <TableCell className="text-end">
                   <RowActions label={`Actions for ${item.nameEn} ${formatNumber(item.weightGrams, 4)} g`}>
                     <RowAction
-                      label="Edit"
+                      label="Edit" need="products:edit"
                       icon={<Pencil aria-hidden="true" />}
                       disabled={busy}
                       onSelect={() => show(item, "edit")}
                     />
                     <RowActionsSeparator />
-                    <RowAction label="Delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
+                    <RowAction label="Delete" need="products:delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
                   </RowActions>
                 </TableCell>
               </TableRow>

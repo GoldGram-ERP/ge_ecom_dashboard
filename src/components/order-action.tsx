@@ -7,6 +7,7 @@ import { Button } from "@/components/animate-ui/components/buttons/button";
 import { api, ApiError, errorMessage } from "@/lib/api";
 import { formatNumber } from "@/lib/format";
 import { orderButton } from "@/lib/labels";
+import { usePermissions } from "@/lib/permissions";
 import { formatEgp, formatSigned } from "@/lib/money";
 import type { OrderDetail, OrderStatus } from "@/lib/types";
 import { Modal } from "./modal";
@@ -46,7 +47,10 @@ export function OrderAction({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [review, setReview] = useState<OrderDetail | null>(null);
-  const button = orderButton(status, overTolerance, refunded);
+  const { can } = usePermissions();
+  const raw = orderButton(status, overTolerance, refunded);
+  // Money steps need the refund permission, every other step the status one.
+  const button = raw && can(raw.action.includes("refund") ? "orders:refund" : "orders:status") ? raw : null;
 
   /** Opens the dialog with the figures the server holds at this moment. */
   async function openReview() {
@@ -127,15 +131,18 @@ export function OrderAction({
             </div>
           </dl>
           <div className="mt-2 flex flex-wrap gap-2">
+            {can("orders:status") ? (<>
             <Button variant="gold" disabled={busy} onClick={() => act("accept")}>
               <T>Accept at original price</T>
             </Button>
             <Button variant="outline" disabled={busy} onClick={() => act("requote")}>
               <T>Re-quote the customer</T>
             </Button>
+            </>) : null}
+            {can("orders:refund") ? (
             <Button variant="destructive" disabled={busy} onClick={() => act("cancel_refund")}>
               <T>Cancel and refund</T>
-            </Button>
+            </Button>) : null}
           </div>
         </Modal>
       ) : null}

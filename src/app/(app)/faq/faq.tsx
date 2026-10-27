@@ -11,6 +11,7 @@ import { toast } from "@/components/toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { AdminFaqItem } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = {
   questionEn: "Question (EN)",
@@ -23,6 +24,7 @@ const LABELS = {
 /** The FAQ screen. A row opens the item's dialog; values change only in that dialog. */
 export function Faq({ items }: { items: AdminFaqItem[] }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   // `null` is closed, `"new"` is the create form; an item is held by id so it shows what the server holds.
   const [open, setOpen] = useState<number | "new" | null>(null);
   const [deleting, setDeleting] = useState<AdminFaqItem | null>(null);
@@ -61,10 +63,12 @@ export function Faq({ items }: { items: AdminFaqItem[] }) {
   return (
     <>
       <div className="flex justify-end">
+        {can("faq:add") ? (
         <Button type="button" variant="gold" onClick={() => setOpen("new")}>
           <Plus aria-hidden="true" />
           <T>Create new</T>
         </Button>
+        ) : null}
       </div>
       <TableCard>
         <Table>
@@ -101,10 +105,12 @@ export function Faq({ items }: { items: AdminFaqItem[] }) {
                     <Status tone={item.active ? "ok" : "mute"}><T>{item.active ? "Active" : "Inactive"}</T></Status>
                   </TableCell>
                   <TableCell className="text-end">
+                    {can("faq:edit") ? (
                     <Button type="button" variant="outline" className="bg-card" aria-label={`Edit ${item.questionEn}`} onClick={() => setOpen(item.id)}>
                       <Pencil aria-hidden="true" />
                       <T>Edit</T>
                     </Button>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))
@@ -118,7 +124,7 @@ export function Faq({ items }: { items: AdminFaqItem[] }) {
           title={editing ? "Edit question" : "New question"}
           onClose={() => setOpen(null)}
           actions={
-            editing ? (
+            editing && can("faq:delete") ? (
               <Button type="button" variant="outline" size="sm" className="bg-card text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={busy} onClick={() => setDeleting(editing)}>
                 <Trash2 aria-hidden="true" />
                 <T>Delete</T>

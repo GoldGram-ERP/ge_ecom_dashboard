@@ -3,6 +3,7 @@ import { RetryButton } from "@/components/retry-button";
 import { Shell } from "@/components/shell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ApiError } from "@/lib/api";
+import { PermissionsProvider } from "@/lib/permissions";
 import { isArabic, serverGet } from "@/lib/api-server";
 import type { AdminUser, PriceBoard } from "@/lib/types";
 
@@ -50,6 +51,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   }
 
   return (
+    <PermissionsProvider superAdmin={user.role === "SUPER_ADMIN"} permissions={user.permissions ?? []}>
     <Shell
       ar={ar}
       name={user.name || user.email}
@@ -59,5 +61,6 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     >
       {children}
     </Shell>
+    </PermissionsProvider>
   );
 }

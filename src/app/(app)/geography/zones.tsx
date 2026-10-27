@@ -15,12 +15,14 @@ import { formatEgp, parseEgpToPiastres, piastresToInput } from "@/lib/money";
 import { buildHref } from "@/lib/query";
 import type { Zone } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = { nameEn: "State (EN)", nameAr: "الولاية (AR)", costPiastres: "Shipping cost (EGP)" };
 
 /** The "Shipping zones" tab of the file's V.geo. */
 export function Zones({ items, filter, ar }: { items: Zone[]; filter: string; ar: boolean }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Zone | null>(null);
   const close = () => {
@@ -78,6 +80,7 @@ export function Zones({ items, filter, ar }: { items: Zone[]; filter: string; ar
   return (
     <>
       <div className="flex flex-wrap justify-end gap-2">
+        {can("geography:add") ? (
         <Button type="button" variant="gold" aria-expanded={adding} onClick={() => {
             setEditing(null);
             setAdding(!adding);
@@ -85,6 +88,7 @@ export function Zones({ items, filter, ar }: { items: Zone[]; filter: string; ar
           {adding ? <X aria-hidden="true" /> : <Plus aria-hidden="true" />}
           <T>{adding ? "Close form" : "Add shipping zone"}</T>
         </Button>
+        ) : null}
       </div>
       {adding ? (
         <Card>
@@ -130,7 +134,7 @@ export function Zones({ items, filter, ar }: { items: Zone[]; filter: string; ar
                 <TableCell className="text-end">
                   <RowActions label={`Actions for ${(ar && item.nameAr) || item.nameEn}`}>
                     <RowAction
-                      label="Edit"
+                      label="Edit" need="geography:edit"
                       icon={<Pencil aria-hidden="true" />}
                       disabled={busy}
                       onSelect={() => {
@@ -139,7 +143,7 @@ export function Zones({ items, filter, ar }: { items: Zone[]; filter: string; ar
                       }}
                     />
                     <RowActionsSeparator />
-                    <RowAction label="Delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
+                    <RowAction label="Delete" need="geography:delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
                   </RowActions>
                 </TableCell>
               </TableRow>

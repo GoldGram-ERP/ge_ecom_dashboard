@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { formatEgp, moneyParseMessage, parseEgpToPiastres, piastresToInput } from "@/lib/money";
 import type { PaymentMethod } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = {
   fixedFeePiastres: "Fixed fee (EGP)",
@@ -27,6 +28,7 @@ const LABELS = {
 /** The table of the file's V.pay: names, two fees, proof and status per method. All of it changes in the row's "Edit" dialog. */
 export function MethodsTable({ methods, ar }: { methods: PaymentMethod[]; ar: boolean }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [editing, setEditing] = useState<PaymentMethod | null>(null);
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -97,10 +99,12 @@ export function MethodsTable({ methods, ar }: { methods: PaymentMethod[]; ar: bo
                   <Status tone={method.active ? "ok" : "mute"}><T>{method.active ? "Active" : "Inactive"}</T></Status>
                 </TableCell>
                 <TableCell className="text-end">
+                  {can("payment_methods:edit") ? (
                   <Button type="button" variant="outline" className="bg-card" disabled={busy} onClick={() => setEditing(method)}>
                     <Pencil aria-hidden="true" />
                     <T>Edit</T>
                   </Button>
+                  ) : null}
                 </TableCell>
               </TableRow>
             ))}

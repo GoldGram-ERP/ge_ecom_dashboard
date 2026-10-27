@@ -6,6 +6,7 @@ import { Button } from "@/components/animate-ui/components/buttons/button";
 import { SelectField, TextField } from "@/components/parts";
 import { toast } from "@/components/toast";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 // Someone else decided while this page was open.
 const REFUSALS = {
@@ -15,6 +16,7 @@ const REFUSALS = {
 /** The "Decision" part of the KYC review: the file's kycAct() and kycRev(). */
 export function KycDecision({ id, kyc }: { id: number; kyc: string }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
 
@@ -33,6 +35,7 @@ export function KycDecision({ id, kyc }: { id: number; kyc: string }) {
           <TextField id="kn" label="Note to customer (optional)" value={note} onChange={(event) => setNote(event.target.value)} />
         </div>
         <div className="flex flex-wrap gap-2">
+          {can("customers:edit") ? (
           <Button
             variant="gold"
             disabled={busy}
@@ -47,6 +50,8 @@ export function KycDecision({ id, kyc }: { id: number; kyc: string }) {
           >
             <T>Approve KYC</T>
           </Button>
+          ) : null}
+          {can("customers:edit") ? (
           <Button
             variant="destructive"
             disabled={busy}
@@ -65,6 +70,7 @@ export function KycDecision({ id, kyc }: { id: number; kyc: string }) {
           >
             <T>Reject and request documents</T>
           </Button>
+          ) : null}
         </div>
       </>
     );

@@ -367,6 +367,7 @@ export interface Administrator {
 export interface Role {
   id: number;
   name: string;
+  description?: string | null;
   builtIn: boolean;
   permissions: string[];
 }

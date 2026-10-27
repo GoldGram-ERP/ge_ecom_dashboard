@@ -16,6 +16,7 @@ import { errorMessage, readResponse } from "@/lib/api";
 import { formatStamp } from "@/lib/format";
 import type { AdminArticle, ArticleType } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = {
   titleEn: "Title (EN)",
@@ -42,6 +43,7 @@ const PHOTO_MAX_BYTES = 2 * 1024 * 1024;
 /** The articles screen. A row opens the article's dialog; values change only in that dialog. */
 export function Articles({ items }: { items: AdminArticle[] }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const router = useRouter();
   // `null` is closed, `"new"` is the create form; an article is held by id so it shows what the server holds.
   const [open, setOpen] = useState<number | "new" | null>(null);
@@ -118,10 +120,12 @@ export function Articles({ items }: { items: AdminArticle[] }) {
   return (
     <>
       <div className="flex justify-end">
+        {can("articles:add") ? (
         <Button type="button" variant="gold" onClick={() => setOpen("new")}>
           <Plus aria-hidden="true" />
           <T>Create new</T>
         </Button>
+        ) : null}
       </div>
       <TableCard>
         <Table>
@@ -160,10 +164,12 @@ export function Articles({ items }: { items: AdminArticle[] }) {
                   </TableCell>
                   <TableCell>{formatStamp(item.publishedAt)}</TableCell>
                   <TableCell className="text-end">
+                    {can("articles:edit") ? (
                     <Button type="button" variant="outline" className="bg-card" aria-label={`Edit ${item.titleEn}`} onClick={() => setOpen(item.id)}>
                       <Pencil aria-hidden="true" />
                       <T>Edit</T>
                     </Button>
+                    ) : null}
                   </TableCell>
                 </TableRow>
               ))
@@ -177,7 +183,7 @@ export function Articles({ items }: { items: AdminArticle[] }) {
           title={editing ? "Edit article" : "New article"}
           onClose={() => setOpen(null)}
           actions={
-            editing ? (
+            editing && can("articles:delete") ? (
               <Button type="button" variant="outline" size="sm" className="bg-card text-destructive hover:bg-destructive/10 hover:text-destructive" disabled={busy} onClick={() => setDeleting(editing)}>
                 <Trash2 aria-hidden="true" />
                 <T>Delete</T>

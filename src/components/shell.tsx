@@ -55,49 +55,50 @@ import {
 } from "@/components/animate-ui/components/radix/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { api, ApiError, errorMessage } from "@/lib/api";
+import { usePermissions } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { Toast, toast } from "./toast";
 
-// [group EN, group AR, [[route, label EN, label AR, icon]]]. "Local" holds the outbox, the
+// [group EN, group AR, [[route, label EN, label AR, icon, screen]]]. "Local" holds the outbox, the
 // local stand-in for email.
-const NAV: [string, string, [string, string, string, LucideIcon][]][] = [
-  ["Overview", "نظرة عامة", [["/", "Dashboard", "لوحة التحكم", LayoutDashboard]]],
-  ["Pricing", "الأسعار", [["/prices", "Gold & silver prices", "أسعار الذهب والفضة", Coins]]],
+const NAV: [string, string, [string, string, string, LucideIcon, string][]][] = [
+  ["Overview", "نظرة عامة", [["/", "Dashboard", "لوحة التحكم", LayoutDashboard, "dashboard"]]],
+  ["Pricing", "الأسعار", [["/prices", "Gold & silver prices", "أسعار الذهب والفضة", Coins, "prices"]]],
   [
     "Orders",
     "الطلبات",
     [
-      ["/orders", "Orders", "الطلبات", ReceiptText],
-      ["/sell-requests", "Sell requests", "طلبات البيع", HandCoins],
+      ["/orders", "Orders", "الطلبات", ReceiptText, "orders"],
+      ["/sell-requests", "Sell requests", "طلبات البيع", HandCoins, "sell_requests"],
     ],
   ],
-  ["Customers", "العملاء", [["/customers", "Customer management", "إدارة العملاء", Users]]],
+  ["Customers", "العملاء", [["/customers", "Customer management", "إدارة العملاء", Users, "customers"]]],
   [
     "Product management",
     "المنتجات",
     [
-      ["/catalog/categories", "Categories", "الفئات", Shapes],
-      ["/catalog/types", "Product types", "أنواع المنتجات", Layers],
-      ["/catalog/manufacturers", "Manufacturers", "المصنّعون", Factory],
-      ["/catalog/products", "Products", "المنتجات", Package],
-      ["/cashback", "Cashback policies", "سياسات الاسترداد", Undo2],
-      ["/discount-rules", "Discount rules", "قواعد الخصم", BadgePercent],
+      ["/catalog/categories", "Categories", "الفئات", Shapes, "categories"],
+      ["/catalog/types", "Product types", "أنواع المنتجات", Layers, "product_types"],
+      ["/catalog/manufacturers", "Manufacturers", "المصنّعون", Factory, "manufacturers"],
+      ["/catalog/products", "Products", "المنتجات", Package, "products"],
+      ["/cashback", "Cashback policies", "سياسات الاسترداد", Undo2, "cashback"],
+      ["/discount-rules", "Discount rules", "قواعد الخصم", BadgePercent, "discount_rules"],
     ],
   ],
-  ["User management", "المستخدمون", [["/admins", "Administrators & roles", "المشرفون", ShieldCheck]]],
-  ["Payments", "المدفوعات", [["/payment-methods", "Payment methods", "طرق الدفع", Wallet]]],
-  ["Geography", "الجغرافيا", [["/geography", "Zones & branches", "المناطق والفروع", MapPinned]]],
+  ["User management", "المستخدمون", [["/admins", "Administrators & roles", "المشرفون", ShieldCheck, "admins"]]],
+  ["Payments", "المدفوعات", [["/payment-methods", "Payment methods", "طرق الدفع", Wallet, "payment_methods"]]],
+  ["Geography", "الجغرافيا", [["/geography", "Zones & branches", "المناطق والفروع", MapPinned, "geography"]]],
   [
     "Settings",
     "الإعدادات",
     [
-      ["/settings", "System settings", "إعدادات النظام", Settings],
-      ["/site-texts", "Website texts", "نصوص الموقع", Languages],
-      ["/articles", "Articles", "المقالات", Newspaper],
-      ["/faq", "FAQ", "الأسئلة الشائعة", CircleHelp],
+      ["/settings", "System settings", "إعدادات النظام", Settings, "settings"],
+      ["/site-texts", "Website texts", "نصوص الموقع", Languages, "site_texts"],
+      ["/articles", "Articles", "المقالات", Newspaper, "articles"],
+      ["/faq", "FAQ", "الأسئلة الشائعة", CircleHelp, "faq"],
     ],
   ],
-  ["System", "النظام", [["/logs", "System logs", "سجلات النظام", ScrollText]]],
+  ["System", "النظام", [["/logs", "System logs", "سجلات النظام", ScrollText, "logs"]]],
 ];
 
 // Screens that are not a sidebar item.
@@ -121,6 +122,7 @@ const MARKET = {
 
 function Navigation({ ar, pathname }: { ar: boolean; pathname: string }) {
   const { setOpenMobile } = useSidebar();
+  const { can } = usePermissions();
   return (
     <Sidebar
       // "left" is the start side: the component flips itself in a right-to-left page.
@@ -137,7 +139,11 @@ function Navigation({ ar, pathname }: { ar: boolean; pathname: string }) {
       </SidebarHeader>
       <SidebarContent>
         <nav aria-label={ar ? "الأقسام" : "Sections"} className="pb-6">
-          {NAV.map(([groupEn, groupAr, items]) => (
+          {NAV.map(([groupEn, groupAr, all]) => {
+            // An item shows only with `view` on its screen; a group with no item is hidden.
+            const items = all.filter(([, , , , screen]) => can(`${screen}:view`));
+            if (items.length === 0) return null;
+            return (
             <SidebarGroup key={groupEn} className="py-1">
               <SidebarGroupLabel className="text-[10px] font-medium tracking-[0.18em] text-sidebar-foreground/55 uppercase">
                 {ar ? groupAr : groupEn}
@@ -160,7 +166,8 @@ function Navigation({ ar, pathname }: { ar: boolean; pathname: string }) {
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
-          ))}
+            );
+          })}
         </nav>
       </SidebarContent>
     </Sidebar>

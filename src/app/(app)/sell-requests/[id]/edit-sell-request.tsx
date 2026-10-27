@@ -9,10 +9,12 @@ import { FormGrid, SelectField, TextAreaField } from "@/components/parts";
 import type { SellRequest } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
 import { SELL_STATUS } from "../labels";
+import { usePermissions } from "@/lib/permissions";
 
 /** The only way to change a sell request: its status and the staff notes, in a dialog. */
 export function EditSellRequest({ request }: { request: SellRequest }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [open, setOpen] = useState(false);
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -26,6 +28,8 @@ export function EditSellRequest({ request }: { request: SellRequest }) {
     );
     if (saved) setOpen(false);
   }
+
+  if (!can("sell_requests:approve")) return null;
 
   return (
     <>

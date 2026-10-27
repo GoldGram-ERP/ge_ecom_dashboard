@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { Ellipsis } from "lucide-react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { useT, wording } from "@/components/t";
+import { usePermissions } from "@/lib/permissions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +43,7 @@ export function RowAction({
   onSelect,
   danger = false,
   disabled = false,
+  need,
 }: {
   label: string;
   icon: ReactNode;
@@ -49,8 +51,12 @@ export function RowAction({
   onSelect?: () => void;
   danger?: boolean;
   disabled?: boolean;
+  /** The permission this action needs; without it the line is not shown. */
+  need?: string;
 }) {
   const router = useRouter();
+  const { can } = usePermissions();
+  if (need && !can(need)) return null;
   return (
     <DropdownMenuItem
       variant={danger ? "destructive" : "default"}

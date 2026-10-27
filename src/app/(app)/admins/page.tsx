@@ -4,7 +4,9 @@ import { Intro, LinkTabs } from "@/components/parts";
 import { serverGet } from "@/lib/api-server";
 import { buildHref, firstParam } from "@/lib/query";
 import type { Administrator, Role } from "@/lib/types";
-import { AddPanel, AdminsTable, NewAdministrator, NewRole, PermissionsTable } from "./admin-parts";
+import { Can } from "@/lib/permissions";
+import { AddPanel, AdminsTable, NewAdministrator } from "./admin-parts";
+import { RoleManager } from "./roles";
 
 // Administrators and roles (AC-28), as two tabs: who can sign in, and what each role may do.
 // Each tab has one job and one "add" button, like the catalog.
@@ -35,9 +37,11 @@ export default async function AdminsPage(props: PageProps<"/admins">) {
       />
       {tab === "admins" ? (
         <>
-          <AddPanel key="administrator" label="Add administrator">
-            <NewAdministrator roles={roles} />
-          </AddPanel>
+          <Can p="admins:add">
+            <AddPanel key="administrator" label="Add administrator">
+              <NewAdministrator roles={roles} />
+            </AddPanel>
+          </Can>
           <CountCards
             current={filter}
             cards={[
@@ -53,12 +57,7 @@ export default async function AdminsPage(props: PageProps<"/admins">) {
           />
         </>
       ) : (
-        <>
-          <AddPanel key="role" label="New role">
-            <NewRole roles={roles} />
-          </AddPanel>
-          <PermissionsTable roles={roles} admins={admins} />
-        </>
+        <RoleManager roles={roles} admins={admins} />
       )}
     </>
   );

@@ -14,12 +14,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { buildHref } from "@/lib/query";
 import type { Manufacturer } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = { nameEn: "Name (EN)", nameAr: "الاسم (AR)", description: "Description" };
 
 /** The "Manufacturers" tab of the file's V.cats. */
 export function Manufacturers({ items, filter, ar }: { items: Manufacturer[]; filter: string; ar: boolean }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [adding, setAdding] = useState(false);
   const [editing, setEditing] = useState<Manufacturer | null>(null);
   const close = () => {
@@ -75,6 +77,7 @@ export function Manufacturers({ items, filter, ar }: { items: Manufacturer[]; fi
   return (
     <>
       <div className="flex flex-wrap justify-end gap-2">
+        {can("manufacturers:add") ? (
         <Button type="button" variant="gold" aria-expanded={adding} onClick={() => {
             setEditing(null);
             setAdding(!adding);
@@ -82,6 +85,7 @@ export function Manufacturers({ items, filter, ar }: { items: Manufacturer[]; fi
           {adding ? <X aria-hidden="true" /> : <Plus aria-hidden="true" />}
           <T>{adding ? "Close form" : "Add manufacturer"}</T>
         </Button>
+        ) : null}
       </div>
       {adding ? (
         <Card>
@@ -127,7 +131,7 @@ export function Manufacturers({ items, filter, ar }: { items: Manufacturer[]; fi
                 <TableCell className="text-end">
                   <RowActions label={`Actions for ${(ar && item.nameAr) || item.nameEn}`}>
                     <RowAction
-                      label="Edit"
+                      label="Edit" need="manufacturers:edit"
                       icon={<Pencil aria-hidden="true" />}
                       disabled={busy}
                       onSelect={() => {
@@ -136,7 +140,7 @@ export function Manufacturers({ items, filter, ar }: { items: Manufacturer[]; fi
                       }}
                     />
                     <RowActionsSeparator />
-                    <RowAction label="Delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
+                    <RowAction label="Delete" need="manufacturers:delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(item)} />
                   </RowActions>
                 </TableCell>
               </TableRow>

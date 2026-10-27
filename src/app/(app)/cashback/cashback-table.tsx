@@ -12,6 +12,7 @@ import { formatNumber } from "@/lib/format";
 import { formatEgp, moneyParseMessage, parseEgpToPiastres, piastresToInput, totalLaborPiastres } from "@/lib/money";
 import type { Product } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = {
   "cashback.withPackagingPiastres": "Refund with packaging",
@@ -34,6 +35,7 @@ const nameOf = (product: Product, ar = false) =>
  */
 export function CashbackTable({ products, ar }: { products: Product[]; ar: boolean }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [editing, setEditing] = useState<Product | null>(null);
 
   /** Saves the two typed EGP amounts as piastres. */
@@ -94,6 +96,7 @@ export function CashbackTable({ products, ar }: { products: Product[]; ar: boole
                   <Status tone={product.cashback.valid ? "ok" : "mute"}><T>{product.cashback.valid ? "Valid" : "Not valid"}</T></Status>
                 </TableCell>
                 <TableCell className="text-end">
+                  {can("cashback:edit") ? (
                   <Button
                     type="button"
                     variant="outline"
@@ -105,6 +108,7 @@ export function CashbackTable({ products, ar }: { products: Product[]; ar: boole
                     <Pencil aria-hidden="true" />
                     <T>Edit</T>
                   </Button>
+                  ) : null}
                 </TableCell>
               </TableRow>
             );

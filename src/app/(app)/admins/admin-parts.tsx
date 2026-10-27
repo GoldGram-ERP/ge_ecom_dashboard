@@ -15,21 +15,11 @@ import { Select } from "@/components/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatStamp } from "@/lib/format";
 import type { Administrator, Role } from "@/lib/types";
+import { usePermissions } from "@/lib/permissions";
 import { useSend } from "@/lib/use-send";
 
 /** The built-in roles are stored in capitals; staff read them as words. */
 export const roleLabel = (name: string) => (name === "SUPER_ADMIN" ? "Super admin" : name === "ADMIN" ? "Admin" : name);
-
-// The seven permissions of SPEC section 3.8.
-const PERMISSIONS: [string, string][] = [
-  ["prices", "Set prices"],
-  ["payments", "Verify payments"],
-  ["kyc", "Approve KYC"],
-  ["refunds", "Approve refunds"],
-  ["settings", "Edit system settings"],
-  ["catalog", "Manage catalog"],
-  ["admins", "Manage administrators"],
-];
 
 const LABELS = {
   name: "Name",
@@ -43,6 +33,7 @@ const LABELS = {
 /** The administrators table. */
 export function AdminsTable({ admins, roles }: { admins: Administrator[]; roles: Role[] }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [deleting, setDeleting] = useState<Administrator | null>(null);
 
   return (
@@ -72,7 +63,7 @@ export function AdminsTable({ admins, roles }: { admins: Administrator[]; roles:
                 <Note className="num">{admin.phone}</Note>
               </TableCell>
               <TableCell>
-                <Select
+                {can("admins:edit") ? <Select
                   // The server's answer decides what the select shows.
                   key={admin.roleId}
                   aria-label={`Role of ${admin.name}`}
@@ -94,7 +85,7 @@ export function AdminsTable({ admins, roles }: { admins: Administrator[]; roles:
                       {roleLabel(role.name)}
                     </option>
                   ))}
-                </Select>
+                </Select> : <T>{roleLabel(admin.roleName)}</T>}
               </TableCell>
               <TableCell>
                 <Status tone={admin.status === "Active" ? "ok" : admin.status === "Suspended" ? "bad" : "mute"}>
@@ -105,7 +96,7 @@ export function AdminsTable({ admins, roles }: { admins: Administrator[]; roles:
               <TableCell>
                 {admin.roleName === "SUPER_ADMIN" ? null : (
                   <div className="flex justify-end gap-2">
-                    <Button
+                    {can("admins:edit") ? <Button
                       variant="outline"
                       size="sm"
                       disabled={busy}
@@ -114,10 +105,10 @@ export function AdminsTable({ admins, roles }: { admins: Administrator[]; roles:
                       }
                     >
                       <T>{admin.status === "Suspended" ? "Activate" : "Suspend"}</T>
-                    </Button>
-                    <Button variant="destructive" size="sm" disabled={busy} onClick={() => setDeleting(admin)}>
+                    </Button> : null}
+                    {can("admins:delete") ? <Button variant="destructive" size="sm" disabled={busy} onClick={() => setDeleting(admin)}>
                       <T>Delete</T>
-                    </Button>
+                    </Button> : null}
                   </div>
                 )}
               </TableCell>
@@ -139,161 +130,6 @@ export function AdminsTable({ admins, roles }: { admins: Administrator[]; roles:
         />
       ) : null}
     </TableCard>
-  );
-}
-
-/** "Permissions by role": one switch per permission and role; the SUPER_ADMIN column is locked. */
-export function PermissionsTable({ roles, admins }: { roles: Role[]; admins: Administrator[] }) {
-  const { busy, send } = useSend();
-  const [deleting, setDeleting] = useState<Role | null>(null);
-
-  return (
-    <Card className="gap-0 overflow-hidden pb-0">
-      <CardHeader className="pb-4">
-        <CardTitle className="font-heading text-lg"><T>Permissions by role</T></CardTitle>
-        <CardDescription>
-          <T>Money-handling steps are separated so no one role can set prices, verify payment and
-          approve refunds alone.</T>
-        </CardDescription>
-      </CardHeader>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead scope="col"><T>Permission</T></TableHead>
-            {roles.map((role) => (
-              <TableHead scope="col" key={role.id} className="whitespace-nowrap">
-                <span className="inline-flex items-center gap-1.5">
-                  {roleLabel(role.name)}
-                  {role.builtIn ? null : (
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      aria-label={`Delete role ${role.name}`}
-                      disabled={busy}
-                      onClick={() => {
-                        if (admins.some((admin) => admin.roleId === role.id)) {
-                          toast("Reassign administrators with this role first");
-                          return;
-                        }
-                        setDeleting(role);
-                      }}
-                    >
-                      <Trash2 />
-                    </Button>
-                  )}
-                </span>
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {PERMISSIONS.map(([key, label]) => (
-            <TableRow key={key}>
-              <TableCell className="font-medium whitespace-nowrap"><T>{label}</T></TableCell>
-              {roles.map((role) => {
-                const has = role.permissions.includes(key);
-                return (
-                  <TableCell key={role.id}>
-                    <Switch
-                      on={has}
-                      label={`${label} for ${role.name}`}
-                      locked={role.name === "SUPER_ADMIN"}
-                      onToggle={() => {
-                        if (busy) return;
-                        send(
-                          "PATCH",
-                          `/admin/roles/${role.id}`,
-                          {
-                            permissions: has
-                              ? role.permissions.filter((name) => name !== key)
-                              : [...role.permissions, key],
-                          },
-                          { labels: LABELS },
-                        );
-                      }}
-                    />
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      {deleting ? (
-        <Confirm
-          question={`Delete the role ${deleting.name}?`}
-          confirmLabel="Delete"
-          danger
-          busy={busy}
-          onConfirm={async () => {
-            await send("DELETE", `/admin/roles/${deleting.id}`, undefined, {
-              done: "Role deleted",
-              refusals: { IN_USE: "Reassign administrators with this role first" },
-            });
-            setDeleting(null);
-          }}
-          onCancel={() => setDeleting(null)}
-        />
-      ) : null}
-    </Card>
-  );
-}
-
-/** "New role". */
-export function NewRole({ roles }: { roles: Role[] }) {
-  const { busy, send } = useSend();
-
-  async function create(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const formElement = event.currentTarget;
-    const form = new FormData(formElement);
-    const name = String(form.get("name")).trim();
-    if (!name) {
-      toast("Name the role first");
-      return;
-    }
-    if (roles.some((role) => role.name.toLowerCase() === name.toLowerCase())) {
-      toast("That role already exists");
-      return;
-    }
-    const created = await send(
-      "POST",
-      "/admin/roles",
-      { name, permissions: form.getAll("permission").map(String) },
-      { done: "Role created", labels: LABELS },
-    );
-    if (created) formElement.reset();
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-heading text-lg"><T>New role</T></CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={create} noValidate className="grid gap-5">
-          <TextField label="Role name" name="name" maxLength={40} className="max-w-sm" />
-          <fieldset className="grid gap-3">
-            <legend className="mb-3 text-xs font-medium tracking-wide text-muted-foreground uppercase"><T>Permissions</T></legend>
-            <div className="flex flex-wrap gap-x-6 gap-y-3">
-              {PERMISSIONS.map(([key, label]) => (
-                <div key={key} className="flex items-center gap-2">
-                  <Checkbox id={`np-${key}`} name="permission" value={key} />
-                  <Label htmlFor={`np-${key}`} className="font-normal">
-                    <T>{label}</T>
-                  </Label>
-                </div>
-              ))}
-            </div>
-          </fieldset>
-          <Button type="submit" variant="gold" disabled={busy} className="w-fit">
-            <Plus />
-            <T>Create role</T>
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
   );
 }
 

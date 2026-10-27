@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { api, ApiError, errorMessage } from "@/lib/api";
 import { formatEgp, parseEgpToPiastres, piastresToInput } from "@/lib/money";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 const LABELS = { buyPiastres: "Buy price", spreadPiastres: "Spread" };
 
@@ -33,6 +34,7 @@ export function MasterPriceForm({
   afterPublish: string;
 }) {
   const router = useRouter();
+  const { can } = usePermissions();
   const [buyText, setBuyText] = useState(piastresToInput(buyPiastres));
   const [spreadText, setSpreadText] = useState(piastresToInput(spreadPiastres));
   const [busy, setBusy] = useState(false);
@@ -119,9 +121,11 @@ export function MasterPriceForm({
           <b className="flex h-9 items-center text-xl font-medium"><T>{spreadVisible ? "Yes" : "No"}</T></b>
         </div>
       </div>
+      {can("prices:update") ? (
       <Button variant="gold" className="w-fit" disabled={busy} onClick={() => publish(false)}>
         <T>Publish price</T>
       </Button>
+      ) : null}
       {askLargeMove ? (
         <Confirm
           question="This moves the price by more than 5%. Publish anyway?"
@@ -144,6 +148,7 @@ export function SilverPriceForm({
   spreadPiastres: number;
 }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [buyText, setBuyText] = useState(piastresToInput(buyPiastres));
   const [spreadText, setSpreadText] = useState(piastresToInput(spreadPiastres));
 
@@ -184,9 +189,11 @@ export function SilverPriceForm({
           onChange={(event) => setSpreadText(event.target.value)}
         />
       </div>
+      {can("prices:update") ? (
       <Button className="w-fit" disabled={busy} onClick={publish}>
         <T>Publish silver price</T>
       </Button>
+      ) : null}
     </>
   );
 }

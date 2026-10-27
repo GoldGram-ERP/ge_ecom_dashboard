@@ -11,10 +11,12 @@ import { formatNumber } from "@/lib/format";
 import { formatEgp } from "@/lib/money";
 import type { DiscountRule } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
+import { usePermissions } from "@/lib/permissions";
 
 /** The table of the file's V.rules, with its on/off switch and delRule(). */
 export function RulesTable({ rules, ar }: { rules: DiscountRule[]; ar: boolean }) {
   const { busy, send } = useSend();
+  const { can } = usePermissions();
   const [deleting, setDeleting] = useState<DiscountRule | null>(null);
 
   return (
@@ -66,9 +68,9 @@ export function RulesTable({ rules, ar }: { rules: DiscountRule[]; ar: boolean }
                   </TableCell>
                   <TableCell className="text-end">
                     <RowActions label={`Actions for ${rule.nameEn}`}>
-                      <RowAction label="Edit" icon={<Pencil aria-hidden="true" />} href={`/discount-rules/${rule.id}`} />
+                      <RowAction label="Edit" need="discount_rules:edit" icon={<Pencil aria-hidden="true" />} href={`/discount-rules/${rule.id}`} />
                       <RowActionsSeparator />
-                      <RowAction label="Delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(rule)} />
+                      <RowAction label="Delete" need="discount_rules:delete" icon={<Trash2 aria-hidden="true" />} danger disabled={busy} onSelect={() => setDeleting(rule)} />
                     </RowActions>
                   </TableCell>
                 </TableRow>
