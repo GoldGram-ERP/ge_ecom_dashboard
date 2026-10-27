@@ -3,6 +3,25 @@
 // عيار for karat, الاستلام من الفرع for pickup, التوصيل for delivery, إنستاباي, ج.م for EGP.
 
 export const EXACT: Record<string, string> = {
+  // ---- email settings
+  "The mail server the store sends its emails through, and how those emails look.": "خادم البريد الذي يرسل المتجر رسائله عبره، وشكل هذه الرسائل.",
+  "SMTP server": "خادم SMTP",
+  "Send emails": "إرسال الرسائل",
+  "While off, the store sends no email.": "عند الإيقاف لا يرسل المتجر أي بريد.",
+  Host: "المضيف",
+  Port: "المنفذ",
+  Username: "اسم المستخدم",
+  "Leave blank to keep the current password": "اتركها فارغة للإبقاء على كلمة المرور الحالية",
+  "From name": "اسم المرسل",
+  "From email": "بريد المرسل",
+  "Use TLS": "استخدام TLS",
+  "On for port 465. Off uses STARTTLS (usually port 587).": "مفعّل للمنفذ 465. عند الإيقاف يُستخدم STARTTLS (عادةً المنفذ 587).",
+  "Email settings saved": "تم حفظ إعدادات البريد",
+  "Send a test email": "إرسال رسالة تجريبية",
+  "Send to": "إرسال إلى",
+  "Send test": "إرسال تجربة",
+  "Test email sent": "تم إرسال الرسالة التجريبية",
+  "Email template preview": "معاينة قالب البريد",
   // ---- sell requests (the storefront's "sell your gold" page)
   "Sell requests": "طلبات البيع",
   New: "جديد",

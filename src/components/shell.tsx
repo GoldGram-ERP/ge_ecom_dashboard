@@ -16,6 +16,7 @@ import {
   LayoutDashboard,
   LogOut,
   type LucideIcon,
+  Mail,
   MapPinned,
   Newspaper,
   Package,
@@ -93,6 +94,7 @@ const NAV: [string, string, [string, string, string, LucideIcon, string][]][] = 
     "الإعدادات",
     [
       ["/settings", "System settings", "إعدادات النظام", Settings, "settings"],
+      ["/email-settings", "Email", "البريد الإلكتروني", Mail, "settings"],
       ["/site-texts", "Website texts", "نصوص الموقع", Languages, "site_texts"],
       ["/articles", "Articles", "المقالات", Newspaper, "articles"],
       ["/faq", "FAQ", "الأسئلة الشائعة", CircleHelp, "faq"],
