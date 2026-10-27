@@ -21,6 +21,7 @@ export interface Settings {
   paidPeriodMinutes: number;
   kycEnabled: boolean;
   requireKycDocPerOrder: boolean;
+  requireEmailOtp: boolean;
   requireStock: boolean;
   showOutOfStockHome: boolean;
   showOutOfStockShop: boolean;
