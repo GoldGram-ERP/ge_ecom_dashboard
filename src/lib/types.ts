@@ -153,8 +153,8 @@ export interface OrderDetail extends OrderRow {
   nationalId?: string | null;
   /** When the customer sent their payment proof; the picture is at `/api/admin/orders/:id/proof`. */
   proofUploadedAt?: string | null;
-  /** Every transfer picture, oldest first, with the order total each one paid up to. */
-  kycDocument?: boolean;
+  /** The ID photos the customer attached (one or two), by id. */
+  kycDocuments?: number[];
   proofs?: { id: number; uploadedAt: string; forTotalPiastres: number | null }[];
   /** What the transfers cover; null before the first picture. */
   paidPiastres?: number | null;

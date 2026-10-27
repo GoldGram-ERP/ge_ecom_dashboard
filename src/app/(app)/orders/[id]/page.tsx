@@ -197,33 +197,28 @@ export default async function OrderPage(props: PageProps<"/orders/[id]">) {
               )}
             </CardContent>
           </Card>
-          {order.kycDocument && (
+          {order.kycDocuments && order.kycDocuments.length > 0 && (
           <Card>
             <CardHeader>
               <CardTitle className="font-heading text-lg"><T>KYC document</T></CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap items-start gap-4">
-                {/* Staff only: the address needs the admin session. Opens full size in a new tab. */}
-                <a href={`/api/admin/orders/${order.id}/kyc-document`} target="_blank" rel="noreferrer" className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
-                  <Image
-                    unoptimized
-                    src={`/api/admin/orders/${order.id}/kyc-document`}
-                    alt={`KYC document of order ${order.id}`}
-                    width={220}
-                    height={320}
-                    className="h-auto max-h-80 w-55 rounded-lg bg-muted object-contain ring-1 ring-foreground/10"
-                  />
-                </a>
-                <div className="grid gap-2 text-sm">
-                  <span className="text-muted-foreground"><T>Uploaded by the customer with the order.</T></span>
-                  <Button variant="outline" size="sm" className="w-fit" asChild>
-                    <a href={`/api/admin/orders/${order.id}/kyc-document`} target="_blank" rel="noreferrer">
-                      <T>Open full size</T>
-                    </a>
-                  </Button>
-                </div>
+                {/* Staff only: the address needs the admin session. Each image opens full size in a new tab. */}
+                {order.kycDocuments.map((docId) => (
+                  <a key={docId} href={`/api/admin/orders/${order.id}/kyc-document/${docId}`} target="_blank" rel="noreferrer" className="rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+                    <Image
+                      unoptimized
+                      src={`/api/admin/orders/${order.id}/kyc-document/${docId}`}
+                      alt={`KYC document of order ${order.id}`}
+                      width={220}
+                      height={320}
+                      className="h-auto max-h-80 w-55 rounded-lg bg-muted object-contain ring-1 ring-foreground/10"
+                    />
+                  </a>
+                ))}
               </div>
+              <p className="mt-3 text-sm text-muted-foreground"><T>Uploaded by the customer with the order. Click an image to open it full size.</T></p>
             </CardContent>
           </Card>
           )}
