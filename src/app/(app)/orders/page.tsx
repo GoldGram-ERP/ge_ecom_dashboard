@@ -50,14 +50,30 @@ export default async function OrdersPage(props: PageProps<"/orders">) {
     serverGet<Settings>("/admin/settings"),
   ]);
   const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
+  // A CSV of the orders that match the current filters (the server builds it, Excel opens it).
+  const exportHref = buildHref("/api/admin/orders/export", {
+    tab: query.tab,
+    q: query.q,
+    delivery: query.delivery,
+    from: query.from,
+    to: query.to,
+  });
 
   return (
     <>
-      <Intro>
-        <T>{ar
-          ? "الإجمالي = المجموع الفرعي + الشحن + رسوم الدفع. يُعاد تسعير الطلب على سعر الذهب الحالي أثناء انتظار الدفع."
-          : "Total = subtotal + shipping + payment fee. Prices are re-checked against the live gold price while a payment waits."}</T>
-      </Intro>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <Intro>
+          <T>{ar
+            ? "الإجمالي = المجموع الفرعي + الشحن + رسوم الدفع. يُعاد تسعير الطلب على سعر الذهب الحالي أثناء انتظار الدفع."
+            : "Total = subtotal + shipping + payment fee. Prices are re-checked against the live gold price while a payment waits."}</T>
+        </Intro>
+        <a
+          href={exportHref}
+          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-secondary px-4 py-2 text-sm font-medium text-secondary-foreground ring-1 ring-foreground/10 transition-[box-shadow,scale] outline-none hover:ring-gold/70 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.985]"
+        >
+          <T>{ar ? "تصدير إلى إكسل" : "Export to Excel"}</T>
+        </a>
+      </div>
       <div className="-mx-4 flex gap-2 overflow-x-auto overflow-y-hidden px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0" id="otabs">
         {ORDER_TABS.map(([key, label]) => {
           const flag = key === "diff" && data.counts.diff > 0;
