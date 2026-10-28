@@ -36,7 +36,6 @@ const GROUPS: [string, Row[]][] = [
     [
       { key: "kycEnabled", kind: "switch", label: "KYC enabled", hint: "Customers must be verified before they transact" },
       { key: "requireKycDocPerOrder", kind: "switch", label: "KYC document on every order", hint: "Customers must upload an ID document before each order can be placed" },
-      { key: "requireEmailOtp", kind: "switch", label: "Email code on registration", hint: "New customers confirm an emailed code to finish signing up. Only takes effect once SMTP is set up under Email." },
       { key: "requireStock", kind: "switch", label: "Require stock", hint: "Block purchase when stock is empty" },
       { key: "showOutOfStockHome", kind: "switch", label: "Show out-of-stock on Home", hint: "" },
       { key: "showOutOfStockShop", kind: "switch", label: "Show out-of-stock in Shop", hint: "" },
