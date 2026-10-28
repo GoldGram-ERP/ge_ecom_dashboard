@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
-import { Note, TextField } from "@/components/parts";
+import { Note, SelectField, TextField } from "@/components/parts";
 import { Switch } from "@/components/switch";
 import { T, useT } from "@/components/t";
 import { toast } from "@/components/toast";
@@ -24,6 +24,18 @@ export interface EmailSettings {
 
 const LABELS = { host: "Host", port: "Port", username: "Username", fromName: "From name", fromEmail: "From email" };
 
+// Known SMTP providers: picking one fills the host, port and TLS. "Custom" leaves the host free.
+const CUSTOM = "custom";
+const PROVIDERS: { id: string; label: string; host: string; port: number; secure: boolean }[] = [
+  { id: "microsoft", label: "Microsoft 365 / Outlook", host: "smtp.office365.com", port: 587, secure: false },
+  { id: "gmail", label: "Gmail / Google Workspace", host: "smtp.gmail.com", port: 587, secure: false },
+  { id: "yahoo", label: "Yahoo", host: "smtp.mail.yahoo.com", port: 465, secure: true },
+  { id: "zoho", label: "Zoho Mail", host: "smtp.zoho.com", port: 465, secure: true },
+  { id: "sendgrid", label: "SendGrid", host: "smtp.sendgrid.net", port: 587, secure: false },
+  { id: "mailgun", label: "Mailgun", host: "smtp.mailgun.org", port: 587, secure: false },
+  { id: "brevo", label: "Brevo (Sendinblue)", host: "smtp-relay.brevo.com", port: 587, secure: false },
+];
+
 export function EmailScreen({ settings }: { settings: EmailSettings }) {
   const t = useT();
   const { can } = usePermissions();
@@ -33,10 +45,33 @@ export function EmailScreen({ settings }: { settings: EmailSettings }) {
   const [password, setPassword] = useState("");
   const set = <K extends keyof EmailSettings>(key: K, value: EmailSettings[K]) => setForm((f) => ({ ...f, [key]: value }));
 
+  // The provider shown follows the host: a known host selects its provider, anything else is "Custom".
+  const provider = PROVIDERS.find((p) => p.host === form.host)?.id ?? CUSTOM;
+  function chooseProvider(id: string) {
+    const picked = PROVIDERS.find((p) => p.id === id);
+    // A known provider fills host, port and TLS; "Custom" leaves them for manual entry.
+    if (picked) setForm((f) => ({ ...f, host: picked.host, port: picked.port, secure: picked.secure }));
+  }
+
   async function save() {
-    const { hasPassword: _stored, ...rest } = form;
-    // A blank password is left out: the backend keeps the stored one.
-    const ok = await send("PUT", "/admin/email-settings", { ...rest, ...(password ? { password } : {}) }, { done: "Email settings saved", labels: LABELS });
+    // Send only the fields the backend accepts — the GET also returns view-only fields
+    // (hasPassword, updatedAt) that its validator rejects. A blank password is left out so the
+    // backend keeps the stored one.
+    const ok = await send(
+      "PUT",
+      "/admin/email-settings",
+      {
+        enabled: form.enabled,
+        host: form.host,
+        port: form.port,
+        secure: form.secure,
+        username: form.username,
+        fromName: form.fromName,
+        fromEmail: form.fromEmail,
+        ...(password ? { password } : {}),
+      },
+      { done: "Email settings saved", labels: LABELS },
+    );
     if (ok) setPassword("");
   }
 
@@ -80,6 +115,19 @@ export function EmailScreen({ settings }: { settings: EmailSettings }) {
             </div>
             <Switch on={form.enabled} label="Send emails" locked={!editable} onToggle={() => set("enabled", !form.enabled)} />
           </div>
+          <SelectField
+            label={t("Provider")}
+            value={provider}
+            disabled={!editable}
+            onChange={(e) => chooseProvider(e.target.value)}
+          >
+            <option value={CUSTOM}>{t("Custom (enter host below)")}</option>
+            {PROVIDERS.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.label}
+              </option>
+            ))}
+          </SelectField>
           <div className="grid gap-4 sm:grid-cols-2">
             <TextField label={t("Host")} value={form.host} disabled={!editable} onChange={(e) => set("host", e.target.value)} />
             <TextField label={t("Port")} type="number" min={1} max={65535} value={form.port} disabled={!editable} onChange={(e) => set("port", Number(e.target.value))} />
