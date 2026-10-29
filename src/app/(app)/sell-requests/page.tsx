@@ -34,7 +34,7 @@ export default async function SellRequestsPage(props: PageProps<"/sell-requests"
   return (
     <>
       <Intro>
-        <T>The estimate is the weight × quantity × our per-gram sell price when the request came in, plus weight × quantity × the cashback per gram for a brand we sell. Staff set the final price after inspecting the piece.</T>
+        <T>The estimate is what we pay: for a brand we sell with a cashback policy, its refund per piece × quantity; otherwise the weight × quantity × our per-gram sell price when the request came in. Staff set the final price after inspecting the piece.</T>
       </Intro>
       <LinkTabs current={status || "all"} items={TABS.map(([key, label]) => ({ key: key || "all", label, href: here(key) }))} />
       <TableCard>
