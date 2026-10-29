@@ -35,11 +35,12 @@ export const EXACT: Record<string, string> = {
   "Courier collects": "مندوب يستلم",
   "Cash at the branch": "نقدًا في الفرع",
   "Bank transfer": "تحويل بنكي",
-  "The estimate is the weight × quantity × our per-gram sell price when the request came in, plus weight × quantity × the cashback per gram for a brand we sell. Staff set the final price after inspecting the piece.":
-    "السعر التقديري = الوزن × الكمية × سعر البيع للجرام وقت وصول الطلب، مضافًا إليه الوزن × الكمية × الكاش باك للجرام للعلامات التي نبيعها. يحدد الفريق السعر النهائي بعد فحص القطعة.",
+  "The estimate is what we pay: for a brand we sell with a cashback policy, its refund per piece × quantity; otherwise the weight × quantity × our per-gram sell price when the request came in. Staff set the final price after inspecting the piece.":
+    "السعر التقديري هو ما ندفعه: لعلامة نبيعها ولها سياسة استرداد، قيمة الاسترداد للقطعة × الكمية؛ وإلا فالوزن × الكمية × سعر البيع للجرام وقت وصول الطلب. يحدد الفريق السعر النهائي بعد فحص القطعة.",
   Brand: "العلامة",
   "Another brand": "علامة أخرى",
   "Cashback per gram (EGP)": "الكاش باك للجرام (ج.م)",
+  "Refund per piece (EGP)": "الاسترداد للقطعة (ج.م)",
   Request: "الطلب",
   Piece: "القطعة",
   "Estimate (EGP)": "السعر التقديري (ج.م)",
@@ -558,11 +559,6 @@ export const EXACT: Record<string, string> = {
   "Delivery days visibility": "إظهار أيام التوصيل",
   "Show estimated delivery days": "إظهار أيام التوصيل المتوقعة",
   "Enter a number, 0 or more": "أدخل رقمًا، صفر أو أكثر",
-  "Buying gold from customers": "شراء الذهب من العملاء",
-  "Cashback, original packaging with the invoice": "الكاش باك، بالتغليف الأصلي ومعها الفاتورة",
-  "Cashback, packaging opened": "الكاش باك، الغلاف مفتوح",
-  "Per gram, for a piece of a brand we sell": "للجرام، لقطعة من علامة نبيعها",
-  "EGP / g": "ج.م / جم",
 
   // ---- website texts
   "Every text of the website, in English and Arabic. Rewrite one and the website shows it within half a minute; restore it and the built-in wording comes back.":

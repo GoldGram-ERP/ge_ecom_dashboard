@@ -28,9 +28,6 @@ export interface Settings {
   spreadVisible: boolean;
   deliveryDaysVisible: boolean;
   branchPickup: boolean;
-  /** Cashback per gram when GoldGram buys back a piece of a brand it sells: original packaging with the invoice, and opened. */
-  sellCashbackSealedPiastres: number;
-  sellCashbackOpenedPiastres: number;
 }
 
 export interface MasterPrice {
@@ -405,7 +402,10 @@ export interface SellRequest {
   productId: number | null;
   /** That brand's name; empty for another brand. */
   brand: string;
+  /** Per-gram cashback of requests from before refunds; 0 since. */
   cashbackGramPiastres: number;
+  /** The product's refund per piece the estimate used (× quantity); null when it is the metal alone. */
+  refundPiastres: number | null;
   condition: "sealed_invoice" | "sealed" | "opened";
   handover: "branch" | "courier";
   payout: "cash" | "instapay" | "bank";

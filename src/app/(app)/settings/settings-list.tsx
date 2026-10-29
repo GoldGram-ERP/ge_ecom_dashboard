@@ -6,18 +6,15 @@ import { T, useT } from "@/components/t";
 import { Switch } from "@/components/switch";
 import { toast } from "@/components/toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { moneyParseMessage, parseEgpToPiastres, piastresToInput } from "@/lib/money";
 import type { Settings } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
 import { usePermissions } from "@/lib/permissions";
 
 type NumberKey = "tolerancePct" | "paidPeriodMinutes";
-type MoneyKey = "sellCashbackSealedPiastres" | "sellCashbackOpenedPiastres";
-type SwitchKey = Exclude<keyof Settings, NumberKey | MoneyKey>;
+type SwitchKey = Exclude<keyof Settings, NumberKey>;
 type Row =
   | { key: SwitchKey; kind: "switch"; label: string; hint: string }
-  | { key: NumberKey; kind: "number"; label: string; hint: string; unit: string }
-  | { key: MoneyKey; kind: "money"; label: string; hint: string; unit: string };
+  | { key: NumberKey; kind: "number"; label: string; hint: string; unit: string };
 
 // The file's SET, with the setting names of SPEC section 3.7.
 const GROUPS: [string, Row[]][] = [
@@ -48,18 +45,12 @@ const GROUPS: [string, Row[]][] = [
       { key: "deliveryDaysVisible", kind: "switch", label: "Delivery days visibility", hint: "Show estimated delivery days" },
     ],
   ],
-  [
-    "Buying gold from customers",
-    [
-      { key: "sellCashbackSealedPiastres", kind: "money", label: "Cashback, original packaging with the invoice", hint: "Per gram, for a piece of a brand we sell", unit: "EGP / g" },
-      { key: "sellCashbackOpenedPiastres", kind: "money", label: "Cashback, packaging opened", hint: "Per gram, for a piece of a brand we sell", unit: "EGP / g" },
-    ],
-  ],
 ];
+// What GoldGram pays when buying gold back is set per product, in Cashback policies.
 
 const LABELS = Object.fromEntries(GROUPS.flatMap(([, rows]) => rows.map((row) => [row.key, row.label])));
 
-/** The cards of the file's V.settings, and the buy-back cashback. Each switch and field saves as it changes. */
+/** The cards of the file's V.settings. Each switch and field saves as it changes. */
 export function SettingsList({ settings }: { settings: Settings }) {
   const t = useT();
   const { busy, send } = useSend();
@@ -90,23 +81,6 @@ export function SettingsList({ settings }: { settings: Settings }) {
                         send("PATCH", "/admin/settings", { [row.key]: !settings[row.key] }, { labels: LABELS });
                       }}
                     />
-                  ) : row.kind === "money" ? (
-                    <span className="flex shrink-0 items-center gap-2">
-                      <InlineNumber
-                        value={piastresToInput(settings[row.key])}
-                        label={`${t(row.label)} (${t(row.unit)})`}
-                        width={84}
-                        onCommit={async (text) => {
-                          const amount = parseEgpToPiastres(text);
-                          if (!amount.ok) {
-                            toast(moneyParseMessage(amount.reason));
-                            return false;
-                          }
-                          return send("PATCH", "/admin/settings", { [row.key]: amount.piastres }, { labels: LABELS });
-                        }}
-                      />
-                      <span className="text-xs text-muted-foreground"><T>{row.unit}</T></span>
-                    </span>
                   ) : (
                     <span className="flex shrink-0 items-center gap-2">
                       <InlineNumber

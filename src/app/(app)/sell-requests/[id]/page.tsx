@@ -85,10 +85,18 @@ export default async function SellRequestPage(props: PageProps<"/sell-requests/[
               <span className="text-sm text-muted-foreground"><T>Sell price per gram (EGP)</T></span>
               <span className="num">{formatEgp(request.gramPiastres)}</span>
             </div>
-            <div className={LINE}>
-              <span className="text-sm text-muted-foreground"><T>Cashback per gram (EGP)</T></span>
-              <span className="num">{formatEgp(request.cashbackGramPiastres)}</span>
-            </div>
+            {request.refundPiastres !== null ? (
+              <div className={LINE}>
+                <span className="text-sm text-muted-foreground"><T>Refund per piece (EGP)</T></span>
+                <span className="num">{formatEgp(request.refundPiastres)}</span>
+              </div>
+            ) : request.cashbackGramPiastres > 0 ? (
+              // A request from before refunds per piece, priced with a cashback per gram.
+              <div className={LINE}>
+                <span className="text-sm text-muted-foreground"><T>Cashback per gram (EGP)</T></span>
+                <span className="num">{formatEgp(request.cashbackGramPiastres)}</span>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
         <Card>
