@@ -111,8 +111,8 @@ export const EXACT: Record<string, string> = {
   "Refund with packaging": "الاسترداد مع التغليف",
   "Refund without packaging": "الاسترداد بدون تغليف",
   Valid: "سارية",
-  "Refund with packaging (EGP)": "الاسترداد مع التغليف (ج.م)",
-  "Refund without packaging (EGP)": "الاسترداد بدون تغليف (ج.م)",
+  "Refund with packaging (EGP / g)": "الاسترداد مع التغليف (ج.م / جم)",
+  "Refund without packaging (EGP / g)": "الاسترداد بدون تغليف (ج.م / جم)",
   "Cashback saved": "تم حفظ سياسة الاسترداد",
   "Product (EN / AR)": "المنتج (إنجليزي / عربي)",
   "Total labor": "إجمالي المصنعية",
@@ -125,8 +125,8 @@ export const EXACT: Record<string, string> = {
     "تؤخذ من المنتج: عدّلها من المنتجات، ثم تعديل، ثم المصنعية للجرام.",
   "Save cashback": "حفظ سياسة الاسترداد",
   Cancel: "إلغاء",
-  "What a customer gets back when reselling the physical item, depending on whether the original packaging is intact, plus the labor portion that applies.":
-    "ما يسترده العميل عند إعادة بيع القطعة، حسب سلامة التغليف الأصلي، مع جزء المصنعية المطبَّق.",
+  "The cashback per gram a customer gets when reselling the piece, on top of today's sell price per gram, depending on whether the original packaging is intact. 0 means none.":
+    "الكاش باك للجرام الذي يحصل عليه العميل عند إعادة بيع القطعة، فوق سعر البيع اليومي للجرام، حسب سلامة التغليف الأصلي. صفر يعني لا يوجد.",
 
   // ---- catalog
   "Name (EN)": "الاسم (إنجليزي)",

@@ -21,8 +21,8 @@ const LABELS = {
 };
 
 const AMOUNTS = [
-  ["withPackagingPiastres", "Refund with packaging (EGP)"],
-  ["withoutPackagingPiastres", "Refund without packaging (EGP)"],
+  ["withPackagingPiastres", "Refund with packaging (EGP / g)"],
+  ["withoutPackagingPiastres", "Refund without packaging (EGP / g)"],
 ] as const;
 
 // Several products share a name (nine "Gold bar"), so the weight tells them apart.
@@ -63,10 +63,10 @@ export function CashbackTable({ products, ar }: { products: Product[]; ar: boole
           <TableRow>
             <TableHead scope="col"><T>Product (EN / AR)</T></TableHead>
             <TableHead scope="col" className="text-end">
-              <T>Refund with packaging</T>
+              <T>Refund with packaging (EGP / g)</T>
             </TableHead>
             <TableHead scope="col" className="text-end">
-              <T>Refund without packaging</T>
+              <T>Refund without packaging (EGP / g)</T>
             </TableHead>
             <TableHead scope="col" className="text-end">
               <T>Total labor</T>

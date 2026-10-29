@@ -18,8 +18,8 @@ export default async function CashbackPage(props: PageProps<"/cashback">) {
   return (
     <>
       <Intro>
-        <T>What a customer gets back when reselling the physical item, depending on whether the
-        original packaging is intact, plus the labor portion that applies.</T>
+        <T>The cashback per gram a customer gets when reselling the piece, on top of today's sell
+        price per gram, depending on whether the original packaging is intact. 0 means none.</T>
       </Intro>
       <CountCards
         current={filter}
