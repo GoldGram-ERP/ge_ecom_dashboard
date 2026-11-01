@@ -3,6 +3,7 @@
 import { InlineNumber } from "@/components/inline-number";
 import { Note } from "@/components/parts";
 import { T, useT } from "@/components/t";
+import { Select } from "@/components/select";
 import { Switch } from "@/components/switch";
 import { toast } from "@/components/toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,23 +15,33 @@ import { usePermissions } from "@/lib/permissions";
 type NumberKey = "tolerancePct" | "paidPeriodMinutes";
 type TimeKey = "marketOpensAt" | "marketClosesAt";
 type LinkKey = "whatsappUrl" | "iosUrl" | "androidUrl" | "instagramUrl" | "facebookUrl" | "tiktokUrl";
-type SwitchKey = Exclude<keyof Settings, NumberKey | TimeKey | LinkKey>;
+type SwitchKey = Exclude<keyof Settings, NumberKey | TimeKey | LinkKey | "marketOpen" | "marketEnforced">;
 type Row =
   | { key: SwitchKey; kind: "switch"; label: string; hint: string }
   | { key: NumberKey; kind: "number"; label: string; hint: string; unit: string }
   | { key: TimeKey; kind: "time"; label: string; hint: string }
-  | { key: LinkKey; kind: "link"; label: string; hint: string };
+  | { key: LinkKey; kind: "link"; label: string; hint: string }
+  | { key: "marketOpen"; kind: "orders"; label: string; hint: string };
+
+// One choice for customers, stored as the two settings the server checks.
+type OrdersMode = "always" | "hours" | "paused";
+const ordersMode = (settings: Settings): OrdersMode =>
+  !settings.marketOpen ? "paused" : settings.marketEnforced ? "hours" : "always";
+const ORDERS_PATCH: Record<OrdersMode, Partial<Settings>> = {
+  always: { marketOpen: true, marketEnforced: false },
+  hours: { marketOpen: true, marketEnforced: true },
+  paused: { marketOpen: false },
+};
 
 // The file's SET, with the setting names of SPEC section 3.7.
 const GROUPS: [string, Row[]][] = [
   [
     "Trading",
     [
-      { key: "marketOpen", kind: "switch", label: "Market status", hint: "Accept orders while the market is open" },
+      { key: "marketOpen", kind: "orders", label: "Orders", hint: "Paused stops all orders right away" },
+      { key: "marketOpensAt", kind: "time", label: "Orders start at", hint: "Cairo time" },
+      { key: "marketClosesAt", kind: "time", label: "Orders stop at", hint: "Cairo time" },
       { key: "storeClosed", kind: "switch", label: "Store closed", hint: "Close the whole store to customers" },
-      { key: "marketEnforced", kind: "switch", label: "Enforce market hours", hint: "Refuse orders outside the market hours below" },
-      { key: "marketOpensAt", kind: "time", label: "Market opens", hint: "Cairo time" },
-      { key: "marketClosesAt", kind: "time", label: "Market closes", hint: "Cairo time" },
       { key: "tolerancePct", kind: "number", label: "Acceptance percentage", hint: "Price difference tolerated before admin review", unit: "%" },
       { key: "paidPeriodMinutes", kind: "number", label: "Allowed paid period", hint: "Unpaid orders are cancelled after this many", unit: "min" },
       { key: "branchPickup", kind: "switch", label: "Collect from our branch", hint: "Offer collection from the branch at checkout" },
@@ -84,13 +95,27 @@ export function SettingsList({ settings }: { settings: Settings }) {
           </CardHeader>
           <CardContent>
             <ul className="divide-y">
-              {rows.map((row) => (
+              {rows.filter((row) => row.kind !== "time" || ordersMode(settings) === "hours").map((row) => (
                 <li key={row.key} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                   <div className="min-w-0">
                     <span className="font-medium"><T>{row.label}</T></span>
                     {row.hint ? <Note><T>{row.hint}</T></Note> : null}
                   </div>
-                  {row.kind === "switch" ? (
+                  {row.kind === "orders" ? (
+                    <Select
+                      aria-label={row.label}
+                      value={ordersMode(settings)}
+                      disabled={busy || !can("settings:edit")}
+                      className="w-56 shrink-0"
+                      onChange={(event) => {
+                        send("PATCH", "/admin/settings", ORDERS_PATCH[event.target.value as OrdersMode], { labels: LABELS });
+                      }}
+                    >
+                      <option value="always">Always open</option>
+                      <option value="hours">Only during set hours</option>
+                      <option value="paused">Paused</option>
+                    </Select>
+                  ) : row.kind === "switch" ? (
                     <Switch
                       on={settings[row.key]}
                       label={row.label}
