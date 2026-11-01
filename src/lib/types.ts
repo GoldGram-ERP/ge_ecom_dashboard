@@ -31,6 +31,12 @@ export interface Settings {
   marketEnforced: boolean;
   marketOpensAt: string;
   marketClosesAt: string;
+  whatsappUrl: string;
+  iosUrl: string;
+  androidUrl: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  tiktokUrl: string;
 }
 
 export interface MasterPrice {
