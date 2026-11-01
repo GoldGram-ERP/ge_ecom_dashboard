@@ -6,15 +6,18 @@ import { T, useT } from "@/components/t";
 import { Switch } from "@/components/switch";
 import { toast } from "@/components/toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import type { Settings } from "@/lib/types";
 import { useSend } from "@/lib/use-send";
 import { usePermissions } from "@/lib/permissions";
 
 type NumberKey = "tolerancePct" | "paidPeriodMinutes";
-type SwitchKey = Exclude<keyof Settings, NumberKey>;
+type TimeKey = "marketOpensAt" | "marketClosesAt";
+type SwitchKey = Exclude<keyof Settings, NumberKey | TimeKey>;
 type Row =
   | { key: SwitchKey; kind: "switch"; label: string; hint: string }
-  | { key: NumberKey; kind: "number"; label: string; hint: string; unit: string };
+  | { key: NumberKey; kind: "number"; label: string; hint: string; unit: string }
+  | { key: TimeKey; kind: "time"; label: string; hint: string };
 
 // The file's SET, with the setting names of SPEC section 3.7.
 const GROUPS: [string, Row[]][] = [
@@ -23,6 +26,9 @@ const GROUPS: [string, Row[]][] = [
     [
       { key: "marketOpen", kind: "switch", label: "Market status", hint: "Accept orders while the market is open" },
       { key: "storeClosed", kind: "switch", label: "Store closed", hint: "Close the whole store to customers" },
+      { key: "marketEnforced", kind: "switch", label: "Enforce market hours", hint: "Refuse orders outside the market hours below" },
+      { key: "marketOpensAt", kind: "time", label: "Market opens", hint: "Cairo time" },
+      { key: "marketClosesAt", kind: "time", label: "Market closes", hint: "Cairo time" },
       { key: "tolerancePct", kind: "number", label: "Acceptance percentage", hint: "Price difference tolerated before admin review", unit: "%" },
       { key: "paidPeriodMinutes", kind: "number", label: "Allowed paid period", hint: "Unpaid orders are cancelled after this many", unit: "min" },
       { key: "branchPickup", kind: "switch", label: "Collect from our branch", hint: "Offer collection from the branch at checkout" },
@@ -79,6 +85,27 @@ export function SettingsList({ settings }: { settings: Settings }) {
                       onToggle={() => {
                         if (busy) return;
                         send("PATCH", "/admin/settings", { [row.key]: !settings[row.key] }, { labels: LABELS });
+                      }}
+                    />
+                  ) : row.kind === "time" ? (
+                    <Input
+                      key={settings[row.key]}
+                      type="time"
+                      dir="ltr"
+                      defaultValue={settings[row.key]}
+                      style={{ width: 120 }}
+                      className="num bg-card"
+                      aria-label={t(row.label)}
+                      disabled={!can("settings:edit")}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") event.currentTarget.blur();
+                      }}
+                      onBlur={async (event) => {
+                        const input = event.currentTarget;
+                        const saved = settings[row.key];
+                        if (input.value === saved) return;
+                        const done = input.value !== "" && (await send("PATCH", "/admin/settings", { [row.key]: input.value }, { labels: LABELS }));
+                        if (!done) input.value = saved;
                       }}
                     />
                   ) : (

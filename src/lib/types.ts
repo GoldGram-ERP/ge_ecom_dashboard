@@ -28,6 +28,9 @@ export interface Settings {
   spreadVisible: boolean;
   deliveryDaysVisible: boolean;
   branchPickup: boolean;
+  marketEnforced: boolean;
+  marketOpensAt: string;
+  marketClosesAt: string;
 }
 
 export interface MasterPrice {
