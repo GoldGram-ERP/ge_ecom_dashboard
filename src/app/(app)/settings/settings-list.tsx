@@ -13,11 +13,13 @@ import { usePermissions } from "@/lib/permissions";
 
 type NumberKey = "tolerancePct" | "paidPeriodMinutes";
 type TimeKey = "marketOpensAt" | "marketClosesAt";
-type SwitchKey = Exclude<keyof Settings, NumberKey | TimeKey>;
+type LinkKey = "whatsappUrl" | "iosUrl" | "androidUrl" | "instagramUrl" | "facebookUrl" | "tiktokUrl";
+type SwitchKey = Exclude<keyof Settings, NumberKey | TimeKey | LinkKey>;
 type Row =
   | { key: SwitchKey; kind: "switch"; label: string; hint: string }
   | { key: NumberKey; kind: "number"; label: string; hint: string; unit: string }
-  | { key: TimeKey; kind: "time"; label: string; hint: string };
+  | { key: TimeKey; kind: "time"; label: string; hint: string }
+  | { key: LinkKey; kind: "link"; label: string; hint: string };
 
 // The file's SET, with the setting names of SPEC section 3.7.
 const GROUPS: [string, Row[]][] = [
@@ -49,6 +51,17 @@ const GROUPS: [string, Row[]][] = [
     [
       { key: "spreadVisible", kind: "switch", label: "Spread visibility", hint: "Show the buy–sell spread to customers" },
       { key: "deliveryDaysVisible", kind: "switch", label: "Delivery days visibility", hint: "Show estimated delivery days" },
+    ],
+  ],
+  [
+    "Website links",
+    [
+      { key: "whatsappUrl", kind: "link", label: "WhatsApp", hint: "Leave empty to hide the link on the website" },
+      { key: "instagramUrl", kind: "link", label: "Instagram", hint: "" },
+      { key: "facebookUrl", kind: "link", label: "Facebook", hint: "" },
+      { key: "tiktokUrl", kind: "link", label: "TikTok", hint: "" },
+      { key: "iosUrl", kind: "link", label: "App Store", hint: "" },
+      { key: "androidUrl", kind: "link", label: "Google Play", hint: "" },
     ],
   ],
 ];
@@ -85,6 +98,33 @@ export function SettingsList({ settings }: { settings: Settings }) {
                       onToggle={() => {
                         if (busy) return;
                         send("PATCH", "/admin/settings", { [row.key]: !settings[row.key] }, { labels: LABELS });
+                      }}
+                    />
+                  ) : row.kind === "link" ? (
+                    <Input
+                      key={settings[row.key]}
+                      type="url"
+                      dir="ltr"
+                      placeholder="https://"
+                      defaultValue={settings[row.key]}
+                      style={{ width: 320, maxWidth: "100%" }}
+                      className="bg-card"
+                      aria-label={t(row.label)}
+                      disabled={!can("settings:edit")}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") event.currentTarget.blur();
+                      }}
+                      onBlur={async (event) => {
+                        const input = event.currentTarget;
+                        const saved = settings[row.key];
+                        const value = input.value.trim();
+                        if (value === saved) return;
+                        if (value !== "" && !/^https?:\/\/\S+$/i.test(value)) {
+                          toast("Enter a full address starting with https://");
+                          input.value = saved;
+                          return;
+                        }
+                        if (!(await send("PATCH", "/admin/settings", { [row.key]: value }, { labels: LABELS }))) input.value = saved;
                       }}
                     />
                   ) : row.kind === "time" ? (
