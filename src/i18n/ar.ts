@@ -531,7 +531,6 @@ export const EXACT: Record<string, string> = {
   // ---- settings
   "Store switches take effect immediately, for every customer.": "تسري مفاتيح المتجر فورًا على كل العملاء.",
   Trading: "التداول",
-  "Orders": "الطلبات",
   "Paused stops all orders right away": "الإيقاف يوقف كل الطلبات فورًا",
   "Always open": "مفتوحة دائمًا",
   "Only during set hours": "في مواعيد محددة فقط",
