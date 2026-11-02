@@ -16,6 +16,24 @@ type NumberKey = "tolerancePct" | "paidPeriodMinutes";
 type TimeKey = "marketOpensAt" | "marketClosesAt";
 type LinkKey = "whatsappUrl" | "iosUrl" | "androidUrl" | "instagramUrl" | "facebookUrl" | "tiktokUrl";
 type SwitchKey = Exclude<keyof Settings, NumberKey | TimeKey | LinkKey | "marketOpen" | "marketEnforced">;
+
+/** What the website can safely use: a full http(s) address, or a WhatsApp number as wa.me. */
+function normalizeLink(key: LinkKey, text: string): string | undefined {
+  const value = text.trim();
+  if (!value) return "";
+  if (key === "whatsappUrl" && !/[:/]/.test(value)) {
+    const digits = value.replace(/\D/g, "");
+    if (digits) return `https://wa.me/${digits}`;
+  }
+  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(value) ? value : `https://${value.replace(/^\/+/, "")}`;
+  try {
+    const url = new URL(withScheme);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 type Row =
   | { key: SwitchKey; kind: "switch"; label: string; hint: string }
   | { key: NumberKey; kind: "number"; label: string; hint: string; unit: string }
@@ -67,7 +85,7 @@ const GROUPS: [string, Row[]][] = [
   [
     "Website links",
     [
-      { key: "whatsappUrl", kind: "link", label: "WhatsApp", hint: "Leave empty to hide the link on the website" },
+      { key: "whatsappUrl", kind: "link", label: "WhatsApp", hint: "A number or a full address; leave empty to hide the link" },
       { key: "instagramUrl", kind: "link", label: "Instagram", hint: "" },
       { key: "facebookUrl", kind: "link", label: "Facebook", hint: "" },
       { key: "tiktokUrl", kind: "link", label: "TikTok", hint: "" },
@@ -142,14 +160,15 @@ export function SettingsList({ settings }: { settings: Settings }) {
                       onBlur={async (event) => {
                         const input = event.currentTarget;
                         const saved = settings[row.key];
-                        const value = input.value.trim();
-                        if (value === saved) return;
-                        if (value !== "" && !/^https?:\/\/\S+$/i.test(value)) {
-                          toast("Enter a full address starting with https://");
+                        const value = normalizeLink(row.key, input.value);
+                        if (value === undefined) {
+                          toast("Enter a web address or a WhatsApp number");
                           input.value = saved;
                           return;
                         }
+                        if (value === saved) return;
                         if (!(await send("PATCH", "/admin/settings", { [row.key]: value }, { labels: LABELS }))) input.value = saved;
+                        else input.value = value;
                       }}
                     />
                   ) : row.kind === "time" ? (
