@@ -148,6 +148,8 @@ export interface OrderDetail extends OrderRow {
   email?: string | null;
   phone?: string | null;
   nationalId?: string | null;
+  /** The reference of the customer's own transfer, as typed at checkout. */
+  paymentReference?: string | null;
   /** When the customer sent their payment proof; the picture is at `/api/admin/orders/:id/proof`. */
   proofUploadedAt?: string | null;
   /** The ID photos the customer attached (one or two), by id. */
