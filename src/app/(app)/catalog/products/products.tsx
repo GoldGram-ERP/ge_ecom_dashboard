@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { type ChangeEvent, type FormEvent, useRef, useState } from "react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { CountCards } from "@/components/count-cards";
+import { useProductFilters } from "@/components/product-filters";
 import { isRowClick } from "@/components/link-row";
 import { Confirm, Modal } from "@/components/modal";
 import { FormGrid, Intro, Note, SelectField, Status, TableCard, TextAreaField, TextField } from "@/components/parts";
@@ -129,8 +130,10 @@ export function Products({
   }
   const karatText = (item: Product) => (item.karat === 999 ? "999" : `${item.karat}K`);
   const [deleting, setDeleting] = useState<Product | null>(null);
-  const shown = items.filter((item) => filter === "all" || (filter === "active") === item.active);
   const here = (f: string) => buildHref("/catalog/products", { f });
+  // Search and the filters are shared with the Stock screen. Status is kept in the address, as the
+  // cards keep it, so a card and the Status filter always agree.
+  const { shown, search, filters } = useProductFilters(items, ar, { value: filter === "all" ? "" : filter, onChange: (value) => router.push(here(value)) });
 
   /** The rows on screen (the card filter applies), as an Excel file. */
   function exportExcel() {
@@ -482,6 +485,8 @@ export function Products({
           { key: "inactive", label: "Inactive", count: items.filter((item) => !item.active).length, note: "Deactivated", href: here("inactive") },
         ]}
       />
+      {search}
+      {filters}
       <TableCard>
         <Table>
           <TableHeader>
