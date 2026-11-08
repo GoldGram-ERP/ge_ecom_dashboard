@@ -3,6 +3,17 @@
 // عيار for karat, الاستلام من الفرع for pickup, التوصيل for delivery, إنستاباي, ج.م for EGP.
 
 export const EXACT: Record<string, string> = {
+  "Add": "إضافة",
+  "Pieces": "القطع",
+  "Search products": "ابحث في المنتجات",
+  "Total pieces": "إجمالي القطع",
+  "Change stock": "تعديل المخزون",
+  "Low stock": "مخزون قليل",
+  "Not limited by stock": "غير مقيّد بالمخزون",
+  "Stock added": "تمت إضافة المخزون",
+  "Stock removed": "تم خصم المخزون",
+  "No products match.": "لا توجد منتجات مطابقة.",
+  "Add pieces when new stock arrives and remove them when some are lost or sold elsewhere. Orders take their pieces from here automatically.": "أضف القطع عند وصول مخزون جديد واخصمها عند فقد بعضها أو بيعه في مكان آخر. تُخصم قطع الطلبات من هنا تلقائيًا.",
   // ---- email settings
   "The mail server the store sends its emails through, and how those emails look.": "خادم البريد الذي يرسل المتجر رسائله عبره، وشكل هذه الرسائل.",
   "SMTP server": "خادم SMTP",
