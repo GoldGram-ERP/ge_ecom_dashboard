@@ -51,6 +51,11 @@ export function RulesTable({ rules, ar }: { rules: DiscountRule[]; ar: boolean }
                   <TableCell>
                     <b className="font-medium">{ar ? nameAr : rule.nameEn}</b>
                     <Note>{ar ? rule.nameEn : nameAr}</Note>
+                    {rule.governorates?.length ? (
+                      <Note>
+                        {rule.governorates.length} <T>governorates only</T>
+                      </Note>
+                    ) : null}
                   </TableCell>
                   <TableCell><T>{rule.target === "labor" ? "Labor" : "Shipping"}</T></TableCell>
                   <TableCell className="num text-end">
