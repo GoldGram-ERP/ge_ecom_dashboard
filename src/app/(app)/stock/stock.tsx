@@ -25,7 +25,7 @@ function Adjust({ item, disabled, onSend }: { item: Product; disabled: boolean; 
     if (await onSend(sign * pieces)) setAmount("1");
   };
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div className="flex flex-wrap items-center justify-end gap-2">
       <Input
         type="number"
         min="1"
@@ -70,10 +70,7 @@ export function Stock({ items, requireStock, ar }: { items: Product[]; requireSt
           <TableHeader>
             <TableRow>
               <TableHead scope="col"><T>Product (EN / AR)</T></TableHead>
-              <TableHead scope="col"><T>Category</T></TableHead>
-              <TableHead scope="col"><T>Karat</T></TableHead>
-              <TableHead scope="col" className="text-end"><T>Weight (g)</T></TableHead>
-              <TableHead scope="col"><T>Stock</T></TableHead>
+              <TableHead scope="col" className="w-36"><T>Stock</T></TableHead>
               <TableHead scope="col" className="text-end"><T>Change stock</T></TableHead>
             </TableRow>
           </TableHeader>
@@ -83,10 +80,10 @@ export function Stock({ items, requireStock, ar }: { items: Product[]; requireSt
                 <TableCell>
                   <span className="font-medium">{ar ? item.nameAr || item.nameEn : item.nameEn}</span>
                   <Note>{ar ? item.nameEn : item.nameAr}</Note>
+                  <Note>
+                    {named(item.categoryName, item.categoryNameAr)} · <T>{item.karat === 999 ? "999" : `${item.karat}K`}</T> · {formatNumber(item.weightGrams, 4)} g
+                  </Note>
                 </TableCell>
-                <TableCell>{named(item.categoryName, item.categoryNameAr)}</TableCell>
-                <TableCell className="num"><T>{item.karat === 999 ? "999" : `${item.karat}K`}</T></TableCell>
-                <TableCell className="num text-end">{formatNumber(item.weightGrams, 4)}</TableCell>
                 <TableCell>
                   <div className="grid justify-items-start gap-1">
                     <b className="num text-base">{item.stock}</b>
