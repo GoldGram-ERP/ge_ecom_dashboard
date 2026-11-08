@@ -267,8 +267,6 @@ export const EXACT: Record<string, string> = {
   Approved: "معتمد",
   "Pending approval": "بانتظار الاعتماد",
   "Documents required": "المستندات مطلوبة",
-  "KYC enforcement is off, so customers can transact without verification. Egyptian regulation requires it for gold. Turn it on in":
-    "التحقق من الهوية غير مُلزِم الآن، لذا يمكن للعملاء الشراء دون توثيق، والقانون المصري يشترطه لتداول الذهب. فعّله من",
   "System settings": "إعدادات النظام",
   "Manage customer accounts, orders and identity documents. Open a customer for the full profile; KYC review happens in the Documents tab.":
     "إدارة حسابات العملاء وطلباتهم ومستندات هويتهم. افتح العميل لعرض ملفه كاملًا، وتتم مراجعة الهوية من تبويب المستندات.",

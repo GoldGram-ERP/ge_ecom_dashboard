@@ -4,13 +4,13 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { CountCards } from "@/components/count-cards";
 import { EmptyRow, Intro, LinkTabs, Note, Status } from "@/components/parts";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { LinkRow } from "@/components/link-row";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { serverGet } from "@/lib/api-server";
 import { formatStamp } from "@/lib/format";
 import { buildHref, firstParam, parsePage } from "@/lib/query";
-import type { CustomerList, Settings } from "@/lib/types";
+import type { CustomerList } from "@/lib/types";
 import { CustomerButtons } from "./customer-buttons";
 import { CustomerRows, CustomerTools } from "./customer-tools";
 import { type CustomerQuery, customersApiQuery, customersHref, DOCUMENT_STATUSES } from "./href";
@@ -36,10 +36,7 @@ export default async function CustomersPage(props: PageProps<"/customers">) {
   };
   const page = parsePage(raw.page);
 
-  const [data, settings] = await Promise.all([
-    serverGet<CustomerList>(buildHref("/admin/customers", customersApiQuery(query, page))),
-    serverGet<Settings>("/admin/settings"),
-  ]);
+  const data = await serverGet<CustomerList>(buildHref("/admin/customers", customersApiQuery(query, page)));
   const { counts } = data;
   const pages = Math.max(1, Math.ceil(data.total / data.pageSize));
   // Up to six page numbers, as a window around the current page.
@@ -48,18 +45,6 @@ export default async function CustomersPage(props: PageProps<"/customers">) {
 
   return (
     <>
-      {settings.kycEnabled ? null : (
-        <Card size="sm" className="bg-accent ring-gold/50">
-          <CardContent>
-            <T>KYC enforcement is off, so customers can transact without verification. Egyptian
-            regulation requires it for gold. Turn it on in</T>{" "}
-            <Link href="/settings" className="font-medium text-gold-deep underline underline-offset-4">
-              <T>System settings</T>
-            </Link>
-            .
-          </CardContent>
-        </Card>
-      )}
       <Intro>
         <T>Manage customer accounts, orders and identity documents. Open a customer for the full
         profile; KYC review happens in the Documents tab.</T>
