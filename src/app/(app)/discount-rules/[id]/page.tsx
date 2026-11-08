@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isArabic, serverList } from "@/lib/api-server";
-import type { DiscountRule } from "@/lib/types";
+import type { DiscountRule, Zone } from "@/lib/types";
 import { NewRuleForm } from "../new/new-rule-form";
 
 // Editing one discount rule: the "new rule" form, filled in.
@@ -12,6 +12,7 @@ export default async function EditRulePage(props: PageProps<"/discount-rules/[id
   const { id } = await props.params;
   const rule = (await serverList<DiscountRule>("/admin/discount-rules")).find((item) => String(item.id) === id);
   const ar = await isArabic();
+  const zones = await serverList<Zone>("/admin/geo/zones");
 
   return (
     <>
@@ -27,7 +28,7 @@ export default async function EditRulePage(props: PageProps<"/discount-rules/[id
             <CardTitle className="font-heading text-lg"><T>Edit</T> {(ar && rule.nameAr) || rule.nameEn}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <NewRuleForm rule={rule} />
+            <NewRuleForm rule={rule} zones={zones} />
           </CardContent>
         </Card>
       ) : (

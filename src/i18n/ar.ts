@@ -3,6 +3,16 @@
 // عيار for karat, الاستلام من الفرع for pickup, التوصيل for delivery, إنستاباي, ج.م for EGP.
 
 export const EXACT: Record<string, string> = {
+  "Restrict to specific locations": "تقييد بمواقع محددة",
+  "Limit this discount to the selected governorates. Leave off to apply everywhere.": "اقصر هذا الخصم على المحافظات المحددة. اتركه مغلقًا ليسري في كل مكان.",
+  "Governorates": "المحافظات",
+  "selected": "محددة",
+  "Select all": "تحديد الكل",
+  "Clear": "مسح",
+  "Choose at least one governorate": "اختر محافظة واحدة على الأقل",
+  "Generate a code": "إنشاء كود",
+  "No shipping zones yet. Add them on the Geography page.": "لا توجد مناطق شحن بعد. أضفها من صفحة الجغرافيا.",
+  "governorates only": "محافظات فقط",
   "All categories": "كل الفئات",
   "All types": "كل الأنواع",
   "All manufacturers": "كل المصنّعين",

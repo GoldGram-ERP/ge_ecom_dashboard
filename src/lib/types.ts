@@ -310,6 +310,8 @@ export interface DiscountRule {
   validFrom: string;
   validTo: string | null;
   enabled: boolean;
+  /** The governorates the rule is limited to; null = every governorate. */
+  governorates?: string[] | null;
   status: "Active" | "Scheduled" | "Inactive";
 }
 
@@ -329,6 +331,8 @@ export interface PaymentMethod {
 
 export interface Zone {
   id: number;
+  /** The governorate's key, as discount rules list it. */
+  governorate?: string;
   nameEn: string;
   nameAr: string;
   costPiastres: number;
