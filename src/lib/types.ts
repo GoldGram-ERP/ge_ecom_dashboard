@@ -28,6 +28,15 @@ export interface Settings {
   spreadVisible: boolean;
   deliveryDaysVisible: boolean;
   branchPickup: boolean;
+  marketEnforced: boolean;
+  marketOpensAt: string;
+  marketClosesAt: string;
+  whatsappUrl: string;
+  iosUrl: string;
+  androidUrl: string;
+  instagramUrl: string;
+  facebookUrl: string;
+  tiktokUrl: string;
 }
 
 export interface MasterPrice {
