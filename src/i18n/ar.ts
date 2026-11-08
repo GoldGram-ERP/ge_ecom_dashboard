@@ -3,6 +3,13 @@
 // عيار for karat, الاستلام من الفرع for pickup, التوصيل for delivery, إنستاباي, ج.م for EGP.
 
 export const EXACT: Record<string, string> = {
+  "All categories": "كل الفئات",
+  "All types": "كل الأنواع",
+  "All manufacturers": "كل المصنّعين",
+  "All karats": "كل العيارات",
+  "All weights": "كل الأوزان",
+  "All statuses": "كل الحالات",
+  "Clear filters": "مسح التصفية",
   "Add": "إضافة",
   "Pieces": "القطع",
   "Search products": "ابحث في المنتجات",

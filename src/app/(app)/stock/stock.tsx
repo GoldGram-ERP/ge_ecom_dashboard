@@ -1,9 +1,9 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
-import { useState } from "react";
+import { type ChangeEvent, useState } from "react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
-import { Note, Status, TableCard } from "@/components/parts";
+import { Note, SelectField, Status, TableCard } from "@/components/parts";
 import { T, useT } from "@/components/t";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -54,8 +54,27 @@ export function Stock({ items, requireStock, ar }: { items: Product[]; requireSt
   const t = useT();
   const [query, setQuery] = useState("");
   const named = (en: string, arabic?: string) => (ar && arabic) || en;
+  // The filters: "" means all. Their lists are the values the products actually use.
+  const [filters, setFilters] = useState({ category: "", type: "", maker: "", karat: "", weight: "", status: "" });
+  const pick = (key: keyof typeof filters) => (event: ChangeEvent<HTMLSelectElement>) => setFilters((prev) => ({ ...prev, [key]: event.target.value }));
+  const filtering = Object.values(filters).some(Boolean);
+  const distinct = (pairs: [string, string][]) => [...new Map(pairs).entries()].sort((a, b) => a[1].localeCompare(b[1], undefined, { numeric: true }));
+  const categories = distinct(items.map((item) => [String(item.categoryId), named(item.categoryName, item.categoryNameAr)]));
+  const types = distinct(items.map((item) => [String(item.typeId), named(item.typeName, item.typeNameAr)]));
+  const makers = distinct(items.map((item) => [String(item.manufacturerId), named(item.manufacturerName, item.manufacturerNameAr)]));
+  const karats = [...new Set(items.map((item) => item.karat))].sort((a, b) => a - b);
+  const weights = [...new Set(items.map((item) => item.weightGrams))].sort((a, b) => a - b);
   const needle = query.trim().toLowerCase();
-  const shown = items.filter((item) => !needle || `${item.nameEn} ${item.nameAr} ${item.categoryName} ${item.typeName}`.toLowerCase().includes(needle));
+  const shown = items.filter(
+    (item) =>
+      (!needle || `${item.nameEn} ${item.nameAr} ${item.categoryName} ${item.typeName}`.toLowerCase().includes(needle)) &&
+      (!filters.category || String(item.categoryId) === filters.category) &&
+      (!filters.type || String(item.typeId) === filters.type) &&
+      (!filters.maker || String(item.manufacturerId) === filters.maker) &&
+      (!filters.karat || String(item.karat) === filters.karat) &&
+      (!filters.weight || String(item.weightGrams) === filters.weight) &&
+      (!filters.status || (filters.status === "active") === item.active),
+  );
 
   return (
     <>
@@ -65,6 +84,51 @@ export function Stock({ items, requireStock, ar }: { items: Product[]; requireSt
           <T>Total pieces</T>: <b className="num">{items.reduce((sum, item) => sum + item.stock, 0)}</b>
         </span>
       </div>
+      <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-6">
+        <SelectField label="Category" value={filters.category} onChange={pick("category")}>
+          <option value="">All categories</option>
+          {categories.map(([id, label]) => (
+            <option key={id} value={id}>{label}</option>
+          ))}
+        </SelectField>
+        <SelectField label="Type" value={filters.type} onChange={pick("type")}>
+          <option value="">All types</option>
+          {types.map(([id, label]) => (
+            <option key={id} value={id}>{label}</option>
+          ))}
+        </SelectField>
+        <SelectField label="Manufacturer" value={filters.maker} onChange={pick("maker")}>
+          <option value="">All manufacturers</option>
+          {makers.map(([id, label]) => (
+            <option key={id} value={id}>{label}</option>
+          ))}
+        </SelectField>
+        <SelectField label="Karat" value={filters.karat} onChange={pick("karat")}>
+          <option value="">All karats</option>
+          {karats.map((karat) => (
+            <option key={karat} value={String(karat)}>{karat === 999 ? "999" : `${karat}K`}</option>
+          ))}
+        </SelectField>
+        <SelectField label="Weight (g)" value={filters.weight} onChange={pick("weight")}>
+          <option value="">All weights</option>
+          {weights.map((weight) => (
+            <option key={weight} value={String(weight)}>{formatNumber(weight, 4)}</option>
+          ))}
+        </SelectField>
+        <SelectField label="Status" value={filters.status} onChange={pick("status")}>
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </SelectField>
+      </div>
+      {filtering ? (
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span>{shown.length} / {items.length}</span>
+          <Button type="button" variant="ghost" size="sm" onClick={() => setFilters({ category: "", type: "", maker: "", karat: "", weight: "", status: "" })}>
+            <T>Clear filters</T>
+          </Button>
+        </div>
+      ) : null}
       <TableCard>
         <Table>
           <TableHeader>
