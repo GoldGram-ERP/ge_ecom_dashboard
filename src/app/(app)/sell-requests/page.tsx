@@ -21,7 +21,7 @@ const TABS = [
 const TABLE =
   "[&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:text-xs [&_th]:tracking-wide [&_th]:text-muted-foreground [&_th]:uppercase";
 
-// Requests to sell gold to GoldGram, from the storefront's sell page. Newest first.
+// Requests to sell gold to GoldGram, newest first. The website no longer takes them (SELL-01): this is their history.
 export default async function SellRequestsPage(props: PageProps<"/sell-requests">) {
   const raw = await props.searchParams;
   const wanted = firstParam(raw.status);
@@ -33,6 +33,9 @@ export default async function SellRequestsPage(props: PageProps<"/sell-requests"
 
   return (
     <>
+      <Intro>
+        <T>Selling back now happens in the app only; the website no longer has a sell form. These are the requests already received.</T>
+      </Intro>
       <Intro>
         <T>The estimate is what we pay: for a brand we sell with a cashback policy, its refund per piece × quantity; otherwise the weight × quantity × our per-gram sell price when the request came in. Staff set the final price after inspecting the piece.</T>
       </Intro>

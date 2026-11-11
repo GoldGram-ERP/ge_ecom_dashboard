@@ -26,6 +26,8 @@ export function PermissionsProvider({
 export function usePermissions() {
   const { all, set } = useContext(Permissions);
   return {
+    /** The role itself, for what only SUPER_ADMIN may touch whatever the permissions say (custom head code). */
+    superAdmin: all,
     can: (permission: string) => all || set.has(permission),
     canAny: (permissions: string[]) => all || permissions.some((permission) => set.has(permission)),
   };

@@ -55,6 +55,7 @@ const MODULES = [
       screen("faq", "FAQ"),
     ],
   },
+  { name: "SEO", screens: [screen("seo", "SEO panel", [["view", "View"], ["edit", "Edit"]])] },
   { name: "System", screens: [screen("logs", "System logs", VIEW)] },
 ];
 
