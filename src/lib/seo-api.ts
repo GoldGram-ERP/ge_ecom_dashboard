@@ -198,6 +198,58 @@ export const seoEditPath = (type: SeoType, key: string) => `/seo/pages/${type}/$
 /** A list the backend may send bare or as `{ items }`. */
 export const listOf = <T,>(body: T[] | { items: T[] } | null | undefined): T[] => (Array.isArray(body) ? body : (body?.items ?? []));
 
+/** What the backend sends for one history line (`adminName`, `createdAt`). */
+interface ApiChange {
+  field: string;
+  oldValue: string;
+  newValue: string;
+  adminName?: string;
+  createdAt?: string;
+  who?: string;
+  when?: string;
+}
+
+/** History lines in the dashboard's shape. */
+export function historyOf(body: ApiChange[] | { items: ApiChange[] } | null | undefined): SeoChange[] {
+  return listOf(body).map((row) => ({
+    who: row.who ?? row.adminName ?? "",
+    when: row.when ?? row.createdAt ?? "",
+    field: row.field,
+    oldValue: row.oldValue,
+    newValue: row.newValue,
+  }));
+}
+
+/** What the backend sends: one row per page, with its problems (`title_missing`, …). */
+interface ApiHealthPage {
+  type: SeoType;
+  key: string;
+  path: string;
+  editPath?: string;
+  issues: { code: string; lang: Lang | null }[];
+}
+
+const HEALTH_CODES: Record<string, HealthIssue> = {
+  title_missing: "missing_title",
+  title_duplicate: "duplicate_title",
+  description_missing: "missing_description",
+  description_duplicate: "duplicate_description",
+  h1_missing: "missing_h1",
+  image_alt_missing: "image_no_alt",
+  noindex: "noindex",
+};
+
+/** Health rows in the dashboard's shape: one row per problem. Rows already in that shape pass through. */
+export function healthOf(body: (ApiHealthPage | HealthRow)[] | { items: (ApiHealthPage | HealthRow)[] } | null | undefined): HealthRow[] {
+  return listOf(body).flatMap((row) => {
+    if (!("issues" in row)) return [row];
+    return row.issues.flatMap((problem) => {
+      const issue = HEALTH_CODES[problem.code];
+      return issue ? [{ type: row.type, key: row.key, path: row.path, issue, lang: problem.lang ?? "" }] : [];
+    });
+  });
+}
+
 /** A saved entry, or the defaults the storefront uses when nothing is saved. */
 export function entryOrDefault(type: SeoType, key: string, saved: Partial<SeoEntry> | null): SeoEntry {
   const l = (value?: Partial<L>): L => ({ ar: value?.ar ?? "", en: value?.en ?? "" });

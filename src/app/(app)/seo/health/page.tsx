@@ -5,12 +5,12 @@ import { EmptyRow, Intro, LinkTabs, Status, TableCard } from "@/components/parts
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { serverGet } from "@/lib/api-server";
 import { firstParam } from "@/lib/query";
-import { type HealthRow, listOf, SEO_API, seoEditPath } from "@/lib/seo-api";
+import { healthOf, SEO_API, seoEditPath } from "@/lib/seo-api";
 import { HEALTH_ISSUES, LANG_NAME } from "@/lib/seo-rules";
 
 // DSH-03: the indexable pages with a problem. Each row opens that page's SEO screen.
 export default async function SeoHealthPage(props: PageProps<"/seo/health">) {
-  const rows = listOf(await serverGet<HealthRow[] | { items: HealthRow[] }>(SEO_API.health));
+  const rows = healthOf(await serverGet<Parameters<typeof healthOf>[0]>(SEO_API.health));
   const wanted = firstParam((await props.searchParams).issue);
   const issue = HEALTH_ISSUES.some(([key]) => key === wanted) ? wanted : "";
   const shown = issue ? rows.filter((row) => row.issue === issue) : rows;

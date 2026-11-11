@@ -6,12 +6,12 @@ import { ApiError } from "@/lib/api";
 import { serverGet, serverGetOrNull } from "@/lib/api-server";
 import {
   entryOrDefault,
-  type HealthRow,
+  healthOf,
+  historyOf,
   listOf,
   type RedirectRule,
   SEO_API,
   SEO_TYPES,
-  type SeoChange,
   type SeoEntry,
   type SiteSeo,
   type Templates,
@@ -60,11 +60,11 @@ export default async function SeoEntryPage(props: PageProps<"/seo/pages/[type]/[
   const path = publicPath(type, key);
   const [saved, history, templates, site, redirects, health] = await Promise.all([
     serverGetOrNull<Partial<SeoEntry>>(SEO_API.entry(type, key)),
-    optional(serverGet<SeoChange[] | { items: SeoChange[] }>(SEO_API.history(type, key)).then(listOf)),
+    optional(serverGet<Parameters<typeof historyOf>[0]>(SEO_API.history(type, key)).then(historyOf)),
     optional(serverGet<Templates>(SEO_API.templates)),
     optional(serverGet<SiteSeo>(SEO_API.site)),
     optional(serverGet<RedirectRule[] | { items: RedirectRule[] }>(SEO_API.redirects).then(listOf)),
-    optional(serverGet<HealthRow[] | { items: HealthRow[] }>(SEO_API.health).then(listOf)),
+    optional(serverGet<Parameters<typeof healthOf>[0]>(SEO_API.health).then(healthOf)),
   ]);
   const enPath = path === "/" ? "/en" : `/en${path}`;
   const issues = (health ?? []).filter((row) => row.type === type && row.key === key);
