@@ -6,7 +6,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import {
+  Activity,
   BadgePercent,
+  Building2,
+  FilePenLine,
+  FileText,
+  Route,
+  Search,
   Coins,
   Factory,
   Globe,
@@ -102,6 +108,18 @@ const NAV: [string, string, [string, string, string, LucideIcon, string][]][] = 
       ["/faq", "FAQ", "الأسئلة الشائعة", CircleHelp, "faq"],
     ],
   ],
+  [
+    "SEO",
+    "تحسين الظهور",
+    [
+      ["/seo/pages", "Pages SEO", "ظهور الصفحات", Search, "seo"],
+      ["/seo/templates", "SEO templates", "قوالب الظهور", FileText, "seo"],
+      ["/seo/site", "Site settings", "إعدادات الموقع", Building2, "seo"],
+      ["/seo/content", "Page content", "محتوى الصفحات", FilePenLine, "seo"],
+      ["/seo/redirects", "Redirects", "التحويلات", Route, "seo"],
+      ["/seo/health", "SEO health", "صحة الظهور", Activity, "seo"],
+    ],
+  ],
   ["System", "النظام", [["/logs", "System logs", "سجلات النظام", ScrollText, "logs"]]],
 ];
 
@@ -112,6 +130,7 @@ const INNER: [RegExp, string, string][] = [
   [/^\/customers\/[^/]+$/, "Customer", "العميل"],
   [/^\/orders\/[^/]+$/, "Order", "الطلب"],
   [/^\/logs\/[^/]+\/[^/]+$/, "Log entry", "سجل"],
+  [/^\/seo\/pages\/[^/]+\/[^/]+$/, "Page SEO", "ظهور الصفحة"],
 ];
 
 function isCurrent(route: string, pathname: string): boolean {

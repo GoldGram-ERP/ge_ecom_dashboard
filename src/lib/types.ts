@@ -447,6 +447,8 @@ export type ArticleType = "financial" | "educational" | "news" | "guide";
 
 export interface AdminArticle {
   id: number;
+  /** The `/guides/{slug}` handle: generated from the English title, editable (SEO build). */
+  slug?: string;
   titleEn: string;
   titleAr: string;
   type: ArticleType;

@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { errorMessage, readResponse } from "@/lib/api";
 import { formatStamp } from "@/lib/format";
 import type { AdminArticle, ArticleType } from "@/lib/types";
+import { slugProblem } from "@/lib/seo-rules";
 import { useSend } from "@/lib/use-send";
 import { usePermissions } from "@/lib/permissions";
 
@@ -27,6 +28,7 @@ const LABELS = {
   bodyAr: "Content (Arabic)",
   sortOrder: "Sort order",
   file: "Photo",
+  slug: "Slug",
 };
 
 const TYPES: [ArticleType, string][] = [
@@ -62,6 +64,13 @@ export function Articles({ items }: { items: AdminArticle[] }) {
       return;
     }
     const date = text("publishedAt");
+    // The /guides/{slug} address: made from the English title on create, editable after (a change makes a 301).
+    const slug = text("slug");
+    const slugIssue = editing ? slugProblem(slug) : null;
+    if (slugIssue) {
+      toast(slugIssue);
+      return;
+    }
     const done = await send(
       editing ? "PATCH" : "POST",
       editing ? `/admin/articles/${editing.id}` : "/admin/articles",
@@ -72,6 +81,7 @@ export function Articles({ items }: { items: AdminArticle[] }) {
         bodyEn: String(form.get("bodyEn") ?? ""),
         bodyAr: String(form.get("bodyAr") ?? ""),
         published: text("published") === "1",
+        ...(editing ? { slug } : {}),
         ...(date ? { publishedAt: new Date(date).toISOString() } : {}),
       },
       { done: editing ? "Article saved" : "Article added", labels: LABELS },
@@ -202,6 +212,7 @@ export function Articles({ items }: { items: AdminArticle[] }) {
                   </option>
                 ))}
               </SelectField>
+              {editing ? <TextField label="Slug" name="slug" dir="ltr" defaultValue={editing.slug ?? ""} /> : null}
               <TextField label="Publication date" name="publishedAt" defaultValue={editing?.publishedAt.slice(0, 10)} type="date" />
               <SelectField label="Status" name="published" defaultValue={editing?.published ? "1" : "0"}>
                 <option value="1">Published</option>
