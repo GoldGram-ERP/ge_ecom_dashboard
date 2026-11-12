@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ApiError, errorMessage, fieldErrorsOf, readResponse } from "./api";
 import { chartPoints } from "./chart";
 import { cairoToday, formatDateTime, formatNumber, formatStamp } from "./format";
-import { deliveryText, fulfilmentBadge, humanise, orderButton, ORDER_TABS, paymentBadge } from "./labels";
+import { deliveryText, fulfilmentBadge, humanise, orderButton, ORDER_TABS, paymentBadge, STATUS_LABELS, statusChoices, statusNeedsConfirm } from "./labels";
 import { buildHref, firstParam, parsePage } from "./query";
 import { rulePreview } from "./rule-preview";
 
@@ -77,6 +77,39 @@ describe("order labels (spec 3.5 and the dashboard file)", () => {
     expect(humanise("order_placed")).toBe("Order placed");
     expect(humanise("kafr_el_sheikh")).toBe("Kafr el sheikh");
     expect(humanise("")).toBe("—");
+  });
+});
+
+describe("order status dropdown", () => {
+  const DELIVERY = ["pending", "processing", "shipping", "completed", "cancelled"];
+
+  it("offers the server's options in the dropdown's order, without refund or initiated", () => {
+    expect(statusChoices("pending", ["cancelled", "refund", "completed", "initiated", "shipping", "processing", "pending", "bogus"]))
+      .toEqual(["pending", "processing", "shipping", "completed", "cancelled"]);
+    expect(statusChoices("ready", ["pending", "processing", "ready", "completed", "cancelled"]))
+      .toEqual(["pending", "processing", "ready", "completed", "cancelled"]);
+  });
+
+  it("still shows a hidden current status as the selected value, first", () => {
+    expect(statusChoices("refund", DELIVERY)).toEqual(["refund", ...DELIVERY]);
+    expect(statusChoices("initiated", DELIVERY)).toEqual(["initiated", ...DELIVERY]);
+    expect(statusChoices("shipping", [])).toEqual(["shipping"]);
+  });
+
+  it("asks before moving into or out of cancelled, and only then", () => {
+    expect(statusNeedsConfirm("pending", "cancelled")).toBe(true);
+    expect(statusNeedsConfirm("completed", "cancelled")).toBe(true);
+    expect(statusNeedsConfirm("cancelled", "pending")).toBe(true);
+    expect(statusNeedsConfirm("cancelled", "completed")).toBe(true);
+    expect(statusNeedsConfirm("cancelled", "cancelled")).toBe(false);
+    expect(statusNeedsConfirm("pending", "processing")).toBe(false);
+    expect(statusNeedsConfirm("refund", "completed")).toBe(false);
+  });
+
+  it("has a word for every status", () => {
+    expect(STATUS_LABELS.map(([status]) => status).sort()).toEqual(
+      ["cancelled", "completed", "initiated", "pending", "processing", "ready", "refund", "shipping"],
+    );
   });
 });
 

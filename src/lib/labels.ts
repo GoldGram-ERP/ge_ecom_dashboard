@@ -98,6 +98,35 @@ export function orderButton(
   }
 }
 
+/** The status dropdown's words, in the order it lists them. `initiated` and `refund` only show as an order's current value. */
+export const STATUS_LABELS: [OrderStatus, string][] = [
+  ["pending", "Pending payment"],
+  ["processing", "Processing"],
+  ["shipping", "Shipping"],
+  ["ready", "Ready for pickup"],
+  ["completed", "Completed"],
+  ["cancelled", "Cancelled"],
+  ["initiated", "Initiated"],
+  ["refund", "Refund initiated"],
+];
+
+/**
+ * What the status dropdown offers: the server's `statusOptions` (it filters by fulfilment), in the
+ * dropdown's order, never `initiated` or `refund`. The current status always comes first when it is
+ * not one of them, so a hidden status still shows as the selected value.
+ */
+export function statusChoices(current: OrderStatus, options: readonly string[]): OrderStatus[] {
+  const offered = STATUS_LABELS.slice(0, 6)
+    .map(([status]) => status)
+    .filter((status) => options.includes(status));
+  return offered.includes(current) ? offered : [current, ...offered];
+}
+
+/** Saving asks first only when the move returns stock (into `cancelled`) or takes it again (out of it). */
+export function statusNeedsConfirm(from: OrderStatus, to: OrderStatus): boolean {
+  return from !== to && (from === "cancelled" || to === "cancelled");
+}
+
 /** `order_placed` → `Order placed`, so any message kind reads as words. */
 export function humanise(key: string): string {
   const words = key.replaceAll("_", " ").trim();

@@ -140,6 +140,8 @@ export interface OrderRow {
   zoneName: string | null;
   zoneNameAr?: string | null;
   status: OrderStatus;
+  /** The statuses staff may pick for this order, by fulfilment. Absent from an API without the status dropdown. */
+  statusOptions?: string[];
   refunded: boolean;
   createdAt: string;
 }
