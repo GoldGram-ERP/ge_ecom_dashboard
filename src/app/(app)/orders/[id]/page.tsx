@@ -4,12 +4,13 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
 import { OrderAction } from "@/components/order-action";
+import { OrderStatusField } from "@/components/order-status";
 import { Intro, Note, Status } from "@/components/parts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getT, isArabic, serverGet, serverGetOrNull } from "@/lib/api-server";
 import { formatDateTime, formatNumber } from "@/lib/format";
-import { deliveryText, fulfilmentBadge, humanise, orderButton, paymentBadge } from "@/lib/labels";
+import { deliveryText, humanise, orderButton } from "@/lib/labels";
 import { formatEgp, formatSigned } from "@/lib/money";
 import type { OrderDetail, Settings } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -66,8 +67,6 @@ export default async function OrderPage(props: PageProps<"/orders/[id]">) {
   }
 
   const [deliveryType, deliveryPlace] = deliveryText(order.fulfilment, (ar && order.zoneNameAr) || order.zoneName);
-  const fulfilment = fulfilmentBadge(order.status, order.fulfilment);
-  const payment = paymentBadge(order.status);
   const difference = order.differencePiastres ?? 0;
   const facts: [string, string][] = [
     ["Customer", order.customerName],
@@ -95,9 +94,11 @@ export default async function OrderPage(props: PageProps<"/orders/[id]">) {
             <span className="num">#{order.id}</span> <span className="text-muted-foreground">·</span>{" "}
             <span className="text-lg text-muted-foreground">{order.reference}</span>
           </h2>
+          {/* The status dropdown stands where the read-only status badges were; the list keeps the badges. */}
+          <div className="mt-2.5">
+            <OrderStatusField id={order.id} status={order.status} statusOptions={order.statusOptions} />
+          </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-            <Status tone={fulfilment[1]}>{fulfilment[0]}</Status>
-            <Status tone={payment[1]}>{payment[0]}</Status>
             {order.refunded ? <Status tone="mute"><T>Refunded</T></Status> : null}
             {order.overTolerance ? <Status tone="bad"><T>Over tolerance</T></Status> : null}
             <span className="text-xs text-muted-foreground"><T>{formatDateTime(order.createdAt)}</T></span>
