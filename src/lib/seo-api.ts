@@ -174,6 +174,43 @@ export interface ImageAlt {
   decorative: boolean;
 }
 
+/** The home sections, in their built-in order (the hero is first and always shown). */
+export const HOME_SECTIONS = ["hero", "prices", "weights", "forms", "popular", "why", "brands", "compare", "how", "proofs", "app", "faq", "about", "contact", "articles", "promise", "record"] as const;
+export type HomeSection = (typeof HOME_SECTIONS)[number];
+
+/** One menu link: a page of the site by `target` (`product:12`), or an address in `url`; never both. */
+export interface MenuLink {
+  label: L;
+  target: string;
+  url: string;
+  /** Dashboard only (never sent): which of the two the staff member picked while both are still empty. */
+  kind?: "page" | "address";
+}
+export interface MenuGroup extends MenuLink {
+  children: MenuLink[];
+}
+export interface MenuColumn {
+  title: L;
+  links: MenuLink[];
+}
+/** `GET|PUT /admin/seo/layout`: the home page's sections and the two menus. */
+export interface Layout {
+  home: { order: HomeSection[]; hidden: HomeSection[]; popularIds: number[] };
+  menus: { header: MenuGroup[]; footer: MenuColumn[] };
+}
+export interface TargetPage {
+  target: string;
+  type: "static" | "category" | "weight" | "brand" | "product" | "guide";
+  name: L;
+  path: string;
+}
+/** `GET /admin/seo/layout`: the saved layout, the pages a link can point at, the products to pick from. */
+export interface LayoutAdmin {
+  layout: Layout;
+  pages: TargetPage[];
+  products: { id: number; name: L; active: boolean }[];
+}
+
 /** Every path, so a renamed route is one line. */
 export const SEO_API = {
   entry: (type: SeoType, key: string) => `/admin/seo/entries/${type}/${encodeURIComponent(key)}`,
@@ -181,6 +218,7 @@ export const SEO_API = {
   summaries: (type: SeoType) => `/seo/entries?type=${type}`,
   templates: "/admin/seo/templates",
   site: "/admin/seo/site",
+  layout: "/admin/seo/layout",
   redirects: "/admin/seo/redirects",
   redirect: (id: number) => `/admin/seo/redirects/${id}`,
   redirectsCsv: "/admin/seo/redirects/export.csv",
