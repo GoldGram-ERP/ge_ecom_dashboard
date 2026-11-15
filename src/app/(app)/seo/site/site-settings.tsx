@@ -3,6 +3,7 @@
 import { Pencil, RotateCcw } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
+import { ImageField, Picture } from "@/components/image-field";
 import { Modal } from "@/components/modal";
 import { Note, TextAreaField, TextField } from "@/components/parts";
 import { T, useT } from "@/components/t";
@@ -13,7 +14,7 @@ import { type L, LANGS, SEO_API, SITE_CODE_FIELDS, type SiteSeo } from "@/lib/se
 import { DEFAULT_ROBOTS, LANG_NAME, robotsProblem, urlProblem } from "@/lib/seo-rules";
 import { useSend } from "@/lib/use-send";
 
-type Kind = "text" | "l" | "url" | "code";
+type Kind = "text" | "l" | "url" | "code" | "image" | "logo";
 type Row = [path: string, label: string, kind: Kind];
 
 // Each card of the screen and its fields, by their path in `SiteSeo`.
@@ -25,9 +26,10 @@ const CARDS: { key: string; title: string; note: string; rows: Row[]; superOnly?
     rows: [
       ["business.siteName", "Site name", "l"],
       ["business.legalName", "Legal name", "l"],
-      ["business.logoUrl", "Logo (SVG) address", "url"],
-      ["business.logoPngUrl", "Logo (512 px PNG) address", "url"],
-      ["business.defaultOgImageUrl", "Default social image address", "url"],
+      // Pictures are uploaded, never typed as an address.
+      ["business.logoUrl", "Logo (SVG)", "logo"],
+      ["business.logoPngUrl", "Logo (512 px PNG)", "image"],
+      ["business.defaultOgImageUrl", "Default social image", "image"],
       ["business.hotline", "Hotline", "text"],
       ["business.whatsapp", "WhatsApp", "text"],
       ["business.email", "Email", "text"],
@@ -106,6 +108,8 @@ export function SiteSettings({ site }: { site: SiteSeo }) {
   const { busy, send } = useSend();
   const [open, setOpen] = useState<string | null>(null);
   const [robots, setRobots] = useState(site.robotsTxt);
+  // Pictures uploaded in the open form, by field path, until Save stores their addresses.
+  const [pictures, setPictures] = useState<Record<string, string>>({});
   const card = CARDS.find((c) => c.key === open) ?? null;
 
   async function save(event: FormEvent<HTMLFormElement>) {
@@ -143,6 +147,9 @@ export function SiteSettings({ site }: { site: SiteSeo }) {
     }
     const text = String(v ?? "");
     if (!text) return <span className="text-muted-foreground">—</span>;
+    if (kind === "image" || kind === "logo") {
+      return <Picture url={text} />;
+    }
     return kind === "code" ? <pre dir="ltr" className="max-h-60 overflow-auto rounded-md bg-muted p-2 text-start font-mono text-xs whitespace-pre-wrap">{text}</pre> : <span dir="ltr">{text}</span>;
   };
 
@@ -162,6 +169,7 @@ export function SiteSettings({ site }: { site: SiteSeo }) {
                     size="sm"
                     aria-label={`Edit ${c.title}`}
                     onClick={() => {
+                      setPictures({});
                       setRobots(site.robotsTxt);
                       setOpen(c.key);
                     }}
@@ -206,6 +214,8 @@ export function SiteSettings({ site }: { site: SiteSeo }) {
                       {robotsProblem(robots) ? <span className="text-xs text-destructive"><T>{robotsProblem(robots) ?? ""}</T></span> : null}
                     </div>
                   </div>
+                ) : kind === "image" || kind === "logo" ? (
+                  <ImageField key={path} label={label} name={path} svg={kind === "logo"} value={pictures[path] ?? String(get(site, path) ?? "")} onChange={(url) => setPictures((all) => ({ ...all, [path]: url }))} />
                 ) : kind === "code" ? (
                   <TextAreaField key={path} label={label} name={path} dir="ltr" className="sm:col-span-2" defaultValue={String(get(site, path) ?? "")} />
                 ) : (

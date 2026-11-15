@@ -3,6 +3,7 @@
 import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { Button } from "@/components/animate-ui/components/buttons/button";
+import { ImageField, Picture } from "@/components/image-field";
 import { Note, Status, TableCard, TextAreaField, TextField } from "@/components/parts";
 import { RichTextEditor } from "@/components/rich-text";
 import { Switch } from "@/components/switch";
@@ -35,7 +36,7 @@ const LABELS = {
   canonical: "Canonical URL",
   ogTitle: "OG title",
   ogDescription: "OG description",
-  ogImageUrl: "OG image address",
+  ogImageUrl: "OG image",
   breadcrumbLabel: "Breadcrumb label",
   introHtml: "Intro text",
   faq: "FAQ",
@@ -145,7 +146,7 @@ export function EntryScreen({
   }
 
   async function save() {
-    const problem = urlProblem(draft.canonical) ?? urlProblem(draft.ogImageUrl) ?? (superAdmin ? headCodeProblem(draft.headCode) : null);
+    const problem = urlProblem(draft.canonical) ?? (superAdmin ? headCodeProblem(draft.headCode) : null);
     if (problem) {
       toast(problem);
       return;
@@ -275,7 +276,7 @@ export function EntryScreen({
             <h3 className="font-heading text-base"><T>Social sharing</T></h3>
             {pairField("ogTitle", "OG title")}
             {pairField("ogDescription", "OG description")}
-            <TextField label="OG image address" dir="ltr" value={draft.ogImageUrl} onChange={(event) => setDraft({ ...draft, ogImageUrl: event.target.value })} />
+            <ImageField label="OG image" value={draft.ogImageUrl} onChange={(ogImageUrl) => setDraft({ ...draft, ogImageUrl })} />
             <Note>A 1200 × 630 image. Empty uses the main image, else the site&apos;s default image.</Note>
 
             {intro ? (
@@ -363,7 +364,7 @@ export function EntryScreen({
                 {lock ? <Note>{LOCK_REASON[lock]}</Note> : null}
               </Field>
               <Field label="Canonical URL" wide>{shown(entry.canonical)}</Field>
-              <Field label="OG image address" wide>{shown(entry.ogImageUrl)}</Field>
+              <Field label="OG image" wide>{entry.ogImageUrl ? <Picture url={entry.ogImageUrl} className="max-h-24 max-w-48" /> : shown("")}</Field>
               <Field label="Focus keyword">{shown(entry.focusKeyword)}</Field>
               <Field label="FAQ"><span className="num">{entry.faq.length}</span> <T>questions</T></Field>
               {intro ? (
