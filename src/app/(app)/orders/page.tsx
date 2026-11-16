@@ -18,8 +18,9 @@ import { OrderFilters, RowsSelect } from "./order-filters";
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const VERIFIED = ["processing", "shipping", "ready", "completed"];
-// The steps the status dropdown cannot take, so a row keeps their button beside it.
-const ROW_BUTTONS = ["review", "refund", "approve_refund"];
+// The one step the status dropdown cannot take, so a row keeps its button beside it. A cancelled
+// order shows no refund button here: "Start refund" and "Approve refund" stay on the order's page.
+const ROW_BUTTONS = ["review"];
 
 // One of the nine count tabs: a link, so the open tab lives in the URL.
 const TAB =

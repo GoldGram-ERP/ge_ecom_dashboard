@@ -12,7 +12,7 @@ import { formatEgp, formatSigned } from "@/lib/money";
 import type { Overview, PriceBoard, Settings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-// The four cards at the top: each is a link to the screen that deals with its number.
+// The two cards at the top: each is a link to the screen that deals with its number.
 const KPI =
   "group rounded-xl bg-card p-5 ring-1 ring-foreground/10 outline-none transition-[box-shadow,scale] hover:ring-gold/70 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.985]";
 
@@ -48,31 +48,17 @@ export default async function HomePage() {
       note: `${overview.withPriceDifference} with a price difference`,
       hot: overview.withPriceDifference > 0,
     },
-    {
-      href: "/customers?kyc=pending",
-      label: "KYC review queue",
-      value: String(overview.kycQueue),
-      note: "Customers pending approval",
-      hot: false,
-    },
-    {
-      href: "/orders?tab=refund",
-      label: "Refunds to approve",
-      value: String(overview.refundsToApprove),
-      note: "Cancelled after payment",
-      hot: false,
-    },
   ];
 
   return (
     <>
       <Intro>
         <T>{ar
-          ? "ما يحتاج قرارًا اليوم: الأسعار وإثباتات الدفع والتحقق والاستردادات."
-          : "What needs a decision today: prices, payment proofs, KYC and refunds."}</T>
+          ? "ما يحتاج قرارًا اليوم: الأسعار وإثباتات الدفع."
+          : "What needs a decision today: prices and payment proofs."}</T>
       </Intro>
 
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3">
         {cards.map((card) => (
           <Link key={card.href} href={card.href} className={cn(KPI, card.hot && "ring-2 ring-destructive/50")}>
             <span className="flex items-center justify-between text-xs font-medium tracking-wide text-muted-foreground uppercase">
