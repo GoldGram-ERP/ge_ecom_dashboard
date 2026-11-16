@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ApiError, errorMessage, fieldErrorsOf, readResponse } from "./api";
 import { chartPoints } from "./chart";
 import { cairoToday, formatDateTime, formatNumber, formatStamp } from "./format";
-import { deliveryText, fulfilmentBadge, humanise, orderButton, ORDER_TABS, paymentBadge, STATUS_LABELS, statusChoices, statusNeedsConfirm } from "./labels";
+import { deliveryText, fulfilmentBadge, HIDDEN_ORDER_TABS, humanise, orderButton, ORDER_TABS, paymentBadge, STATUS_LABELS, statusChoices, statusNeedsConfirm } from "./labels";
 import { buildHref, firstParam, parsePage } from "./query";
 import { rulePreview } from "./rule-preview";
 
@@ -57,7 +57,7 @@ describe("order labels (spec 3.5 and the dashboard file)", () => {
     expect(deliveryText("storage", null)).toEqual(["Storage", "Insured storage"]);
   });
 
-  it("lists the ten tabs in the file's order", () => {
+  it("lists the nine cards in the file's order; refunds are a filter without a card", () => {
     expect(ORDER_TABS.map(([key]) => key)).toEqual([
       "all",
       "initiated",
@@ -68,8 +68,8 @@ describe("order labels (spec 3.5 and the dashboard file)", () => {
       "delivery",
       "completed",
       "cancelled",
-      "refund",
     ]);
+    expect(HIDDEN_ORDER_TABS).toEqual(["refund"]);
     expect(ORDER_TABS[3][1]).toBe("Price difference");
   });
 
