@@ -15,8 +15,10 @@ export const ORDER_TABS: [OrderTab, string][] = [
   ["delivery", "Delivery"],
   ["completed", "Completed"],
   ["cancelled", "Cancelled"],
-  ["refund", "Refund initiated"],
 ];
+
+/** A tab the list still filters by (the home screen links to it) though it has no card. */
+export const HIDDEN_ORDER_TABS: OrderTab[] = ["refund"];
 
 /** The "Fulfilment" column (the file's `FU`). */
 export function fulfilmentBadge(status: OrderStatus, fulfilment: Fulfilment): BadgeText {

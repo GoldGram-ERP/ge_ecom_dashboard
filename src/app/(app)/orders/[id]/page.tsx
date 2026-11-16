@@ -96,7 +96,7 @@ export default async function OrderPage(props: PageProps<"/orders/[id]">) {
           </h2>
           {/* The status dropdown stands where the read-only status badges were; the list keeps the badges. */}
           <div className="mt-2.5">
-            <OrderStatusField id={order.id} status={order.status} statusOptions={order.statusOptions} />
+            <OrderStatusField key={order.status} id={order.id} status={order.status} statusOptions={order.statusOptions} />
           </div>
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             {order.refunded ? <Status tone="mute"><T>Refunded</T></Status> : null}

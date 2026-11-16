@@ -1,24 +1,27 @@
 import { T } from "@/components/t";
 import Link from "next/link";
 import { OrderAction } from "@/components/order-action";
+import { OrderStatusField } from "@/components/order-status";
 import { Pager } from "@/components/pager";
 import { EmptyRow, Intro, Note, Status, TableCard } from "@/components/parts";
 import { LinkRow } from "@/components/link-row";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { isArabic, serverGet } from "@/lib/api-server";
 import { formatNumber, formatStamp } from "@/lib/format";
-import { deliveryText, fulfilmentBadge, ORDER_TABS, paymentBadge } from "@/lib/labels";
+import { deliveryText, fulfilmentBadge, HIDDEN_ORDER_TABS, ORDER_TABS, orderButton, paymentBadge } from "@/lib/labels";
 import { formatEgp, formatSigned } from "@/lib/money";
 import { buildHref, firstParam, parsePage } from "@/lib/query";
-import type { OrderList, Settings } from "@/lib/types";
+import type { OrderList, OrderTab, Settings } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { type OrderQuery, ordersHref } from "./href";
 import { OrderFilters, RowsSelect } from "./order-filters";
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const VERIFIED = ["processing", "shipping", "ready", "completed"];
+// The steps the status dropdown cannot take, so a row keeps their button beside it.
+const ROW_BUTTONS = ["review", "refund", "approve_refund"];
 
-// One of the ten count tabs: a link, so the open tab lives in the URL.
+// One of the nine count tabs: a link, so the open tab lives in the URL.
 const TAB =
   "rounded-xl bg-card px-4 py-3 ring-1 ring-foreground/10 outline-none transition-[box-shadow,background-color,scale] hover:ring-gold/70 focus-visible:ring-2 focus-visible:ring-ring active:scale-[0.985]";
 const TABLE =
@@ -33,7 +36,7 @@ export default async function OrdersPage(props: PageProps<"/orders">) {
   const to = firstParam(raw.to);
   const pageSize = firstParam(raw.pageSize);
   const query: OrderQuery = {
-    tab: ORDER_TABS.some(([key]) => key === tab) ? tab : "all",
+    tab: ORDER_TABS.some(([key]) => key === tab) || HIDDEN_ORDER_TABS.includes(tab as OrderTab) ? tab : "all",
     q: firstParam(raw.q),
     delivery: ["storage", "branch", "delivery"].includes(delivery) ? delivery : "",
     from: DAY.test(from) ? from : "",
@@ -123,6 +126,7 @@ export default async function OrdersPage(props: PageProps<"/orders">) {
                   const fulfilment = fulfilmentBadge(order.status, order.fulfilment);
                   const payment = paymentBadge(order.status);
                   const difference = order.differencePiastres ?? 0;
+                  const button = orderButton(order.status, order.overTolerance, order.refunded);
                   return (
                     <LinkRow key={order.id} href={`/orders/${order.id}`}>
                       {/* Seven columns, each answering one question, so the row fits a laptop without scrolling. */}
@@ -187,14 +191,20 @@ export default async function OrdersPage(props: PageProps<"/orders">) {
                         <Status tone={payment[1]}>{payment[0]}</Status>
                         {order.refunded ? <Note><T>Refunded</T></Note> : null}
                       </TableCell>
-                      <TableCell className="text-end">
-                        <OrderAction
-                          id={order.id}
-                          status={order.status}
-                          overTolerance={order.overTolerance}
-                          refunded={order.refunded}
-                          tolerancePct={settings.tolerancePct}
-                        />
+                      <TableCell>
+                        {/* The status dropdown changes the order from its row; picking a status saves it. */}
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          <OrderStatusField key={order.status} id={order.id} status={order.status} statusOptions={order.statusOptions} compact />
+                          {button && ROW_BUTTONS.includes(button.action) ? (
+                            <OrderAction
+                              id={order.id}
+                              status={order.status}
+                              overTolerance={order.overTolerance}
+                              refunded={order.refunded}
+                              tolerancePct={settings.tolerancePct}
+                            />
+                          ) : null}
+                        </div>
                       </TableCell>
                     </LinkRow>
                   );
