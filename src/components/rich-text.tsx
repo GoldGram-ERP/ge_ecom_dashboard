@@ -51,6 +51,7 @@ export function RichTextEditor({
   dir = "ltr",
   onInsertImage,
   imageHint,
+  images = true,
 }: {
   label: string;
   name?: string;
@@ -59,6 +60,8 @@ export function RichTextEditor({
   dir?: "ltr" | "rtl";
   onInsertImage?: (file: File) => Promise<string | null>;
   imageHint?: string;
+  /** False where the text holds no pictures (a product has its own photos): the image button is left out. */
+  images?: boolean;
 }) {
   const [html, setHtml] = useState(value);
   const [uploading, setUploading] = useState(false);
@@ -161,8 +164,12 @@ export function RichTextEditor({
               <option key={w} value={w}>{text} {w}</option>
             ))}
           </select>
-          {tool(onInsertImage ? "Insert image" : "Save the article first, then add images", <ImagePlus />, false, () => picker.current?.click(), !onInsertImage || uploading)}
-          <input ref={picker} type="file" accept={IMAGE_TYPES.join(",")} hidden tabIndex={-1} aria-hidden="true" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void pick(file); }} />
+          {images ? (
+            <>
+              {tool(onInsertImage ? "Insert image" : "Save the article first, then add images", <ImagePlus />, false, () => picker.current?.click(), !onInsertImage || uploading)}
+              <input ref={picker} type="file" accept={IMAGE_TYPES.join(",")} hidden tabIndex={-1} aria-hidden="true" onChange={(event) => { const file = event.target.files?.[0]; event.target.value = ""; void pick(file); }} />
+            </>
+          ) : null}
         </div>
         <EditorContent editor={editor} />
       </div>
