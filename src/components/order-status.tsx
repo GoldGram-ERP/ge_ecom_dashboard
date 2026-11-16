@@ -19,6 +19,7 @@ const LABEL = Object.fromEntries(STATUS_LABELS) as Record<OrderStatus, string>;
 const REFUSALS: Record<string, string> = {
   OUT_OF_STOCK: "Not enough stock to take this order out of Cancelled, so nothing was changed. Restock its items, then try again.",
   INVALID_STATUS: "That status does not fit this order, so nothing was changed. Pick another one.",
+  NEEDS_REVIEW: "The price moved more than the tolerance while this payment was waiting, so nothing was changed. Use Review to accept, re-quote or cancel it.",
 };
 
 /**
@@ -68,7 +69,8 @@ export function OrderStatusField({
         setError(message);
       }
       if (code === "UNAUTHENTICATED") router.replace("/login");
-      if (code === "NOT_FOUND") router.refresh();
+      // The price moved since the page was read: read it again so the Review button shows.
+      if (code === "NOT_FOUND" || code === "NEEDS_REVIEW") router.refresh();
       return;
     }
     setBusy(false);

@@ -1023,6 +1023,7 @@ export const EXACT: Record<string, string> = {
   "Order status": "حالة الطلب",
   "Note for the history (optional)": "ملاحظة للسجل (اختيارية)",
   "Status changed": "تم تغيير الحالة",
+  "The price moved more than the tolerance while this payment was waiting, so nothing was changed. Use Review to accept, re-quote or cancel it.": "تحرّك السعر أكثر من نسبة السماح أثناء انتظار هذا الدفع، فلم يتغير شيء. استخدم «مراجعة» لقبوله أو إعادة تسعيره أو إلغائه.",
   "Cancel this order? Its items go back to stock.": "إلغاء هذا الطلب؟ ستعود منتجاته إلى المخزون.",
   "Take this order out of Cancelled? Its items are taken from stock again.": "إخراج هذا الطلب من «ملغى»؟ ستُخصم منتجاته من المخزون مرة أخرى.",
   "Cancel order": "إلغاء الطلب",
