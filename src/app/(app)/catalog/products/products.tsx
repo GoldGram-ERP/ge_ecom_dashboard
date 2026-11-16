@@ -51,7 +51,6 @@ export function Products({
   categories,
   types,
   manufacturers,
-  requireStock,
   filter,
   ar,
 }: {
@@ -59,14 +58,14 @@ export function Products({
   categories: Category[];
   types: ProductType[];
   manufacturers: Manufacturer[];
-  requireStock: boolean;
   filter: string;
   ar: boolean;
 }) {
   const { busy, send } = useSend();
   const { can } = usePermissions();
   const t = useT();
-  // The Stock field is its own permission: without it the field is shown but cannot be typed in.
+  // Stock is typed here only when a product is created, and only with its own permission (without
+  // it the field is shown locked at 0). After that it is changed on the Stock screen alone.
   const mayStock = can("products:edit_stock");
   const [adding, setAdding] = useState(false);
   const router = useRouter();
@@ -171,11 +170,12 @@ export function Products({
     }
     const karat = Number(text("karat"));
     const weightGrams = Number(text("weightGrams"));
-    // A locked Stock field sends nothing: the product keeps its stock, and a new one starts at 0.
-    const stock = mayStock ? Number(text("stock")) : (editing?.stock ?? 0);
+    // Editing has no Stock field: the product keeps its stock. A locked field on a new one means 0.
+    const typesStock = !editing && mayStock;
+    const stock = typesStock ? Number(text("stock")) : 0;
     const labor = parseEgpToPiastres(text("labor"));
     if (
-      ["karat", "weightGrams", ...(mayStock ? ["stock"] : []), "labor"].some((name) => text(name) === "") ||
+      ["karat", "weightGrams", ...(typesStock ? ["stock"] : []), "labor"].some((name) => text(name) === "") ||
       !Number.isFinite(karat) ||
       !Number.isFinite(weightGrams) ||
       !Number.isInteger(stock) ||
@@ -201,7 +201,7 @@ export function Products({
         manufacturerId: Number(text("manufacturerId")),
         karat,
         weightGrams,
-        ...(mayStock || !editing ? { stock } : {}),
+        ...(editing ? {} : { stock }),
         laborPiastres: labor.piastres,
         descriptionEn: text("descriptionEn"),
         descriptionAr: text("descriptionAr"),
@@ -263,17 +263,19 @@ export function Products({
         </SelectField>
         <TextField id="f_prod_k" label="Karat (999 for silver)" name="karat" defaultValue={editing?.karat} type="number" min="0" step="any" />
         <TextField id="f_prod_g" label="Weight (g)" name="weightGrams" defaultValue={editing?.weightGrams} type="number" min="0" step="any" />
-        <TextField
-          id="f_prod_s"
-          label="Stock"
-          name="stock"
-          defaultValue={editing?.stock ?? (mayStock ? undefined : 0)}
-          type="number"
-          min="0"
-          step="any"
-          disabled={!mayStock}
-          title={mayStock ? undefined : t("Your role cannot change the stock.")}
-        />
+        {editing ? null : (
+          <TextField
+            id="f_prod_s"
+            label="Stock"
+            name="stock"
+            defaultValue={mayStock ? undefined : 0}
+            type="number"
+            min="0"
+            step="any"
+            disabled={!mayStock}
+            title={mayStock ? undefined : t("Your role cannot change the stock.")}
+          />
+        )}
         <TextField id="f_prod_l" label="Labor per gram (EGP)" name="labor" defaultValue={editing ? piastresToInput(editing.laborPiastres) : undefined} type="number" min="0" step="any" />
       </FormGrid>
       <div className="grid gap-4 sm:grid-cols-2">
@@ -460,7 +462,6 @@ export function Products({
                   ["Manufacturer", named(opened.manufacturerName, opened.manufacturerNameAr)],
                   ["Karat", <span className="num" key="v"><T>{karatText(opened)}</T></span>],
                   ["Weight (g)", <span className="num" key="v">{formatNumber(opened.weightGrams, 4)}</span>],
-                  ["Stock", <span className="num" key="v">{opened.stock}</span>],
                   ["Labor per gram (EGP)", <span className="num" key="v">{formatEgp(opened.laborPiastres)}</span>],
                   ["Total labor (EGP)", <span className="num" key="v">{formatEgp(totalLabor(opened))}</span>],
                   ["Price today (EGP)", <span className="num" key="v">{formatEgp(opened.priceTodayPiastres)}</span>],
@@ -513,7 +514,6 @@ export function Products({
               <TableHead scope="col" className="text-end">
                 <T>Weight (g)</T>
               </TableHead>
-              <TableHead scope="col"><T>Stock</T></TableHead>
               <TableHead scope="col" className="text-end">
                 <T>Total labor</T>
               </TableHead>
@@ -553,12 +553,6 @@ export function Products({
                 <TableCell>{named(item.manufacturerName, item.manufacturerNameAr)}</TableCell>
                 <TableCell className="num"><T>{karatText(item)}</T></TableCell>
                 <TableCell className="num text-end">{formatNumber(item.weightGrams, 4)}</TableCell>
-                <TableCell>
-                  <div className="grid justify-items-start gap-1">
-                    <span className="num">{item.stock}</span>
-                    {requireStock && item.stock === 0 ? <Status tone="bad"><T>Out of stock</T></Status> : null}
-                  </div>
-                </TableCell>
                 <TableCell className="num text-end">{formatEgp(totalLabor(item))}</TableCell>
                 <TableCell className="num text-end text-base text-secondary-foreground">
                   {formatEgp(item.priceTodayPiastres)}
