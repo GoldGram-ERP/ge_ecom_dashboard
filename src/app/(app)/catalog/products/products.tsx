@@ -1,6 +1,6 @@
 "use client";
 
-import { T } from "@/components/t";
+import { T, useT } from "@/components/t";
 import { Download, Eye, ImagePlus, Pencil, Plus, RefreshCw, Trash2, X } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -65,6 +65,9 @@ export function Products({
 }) {
   const { busy, send } = useSend();
   const { can } = usePermissions();
+  const t = useT();
+  // The Stock field is its own permission: without it the field is shown but cannot be typed in.
+  const mayStock = can("products:edit_stock");
   const [adding, setAdding] = useState(false);
   const router = useRouter();
   // One product's dialog: it opens on "View", and nothing can be typed before "Edit" is chosen.
@@ -168,10 +171,11 @@ export function Products({
     }
     const karat = Number(text("karat"));
     const weightGrams = Number(text("weightGrams"));
-    const stock = Number(text("stock"));
+    // A locked Stock field sends nothing: the product keeps its stock, and a new one starts at 0.
+    const stock = mayStock ? Number(text("stock")) : (editing?.stock ?? 0);
     const labor = parseEgpToPiastres(text("labor"));
     if (
-      ["karat", "weightGrams", "stock", "labor"].some((name) => text(name) === "") ||
+      ["karat", "weightGrams", ...(mayStock ? ["stock"] : []), "labor"].some((name) => text(name) === "") ||
       !Number.isFinite(karat) ||
       !Number.isFinite(weightGrams) ||
       !Number.isInteger(stock) ||
@@ -197,7 +201,7 @@ export function Products({
         manufacturerId: Number(text("manufacturerId")),
         karat,
         weightGrams,
-        stock,
+        ...(mayStock || !editing ? { stock } : {}),
         laborPiastres: labor.piastres,
         descriptionEn: text("descriptionEn"),
         descriptionAr: text("descriptionAr"),
@@ -259,7 +263,17 @@ export function Products({
         </SelectField>
         <TextField id="f_prod_k" label="Karat (999 for silver)" name="karat" defaultValue={editing?.karat} type="number" min="0" step="any" />
         <TextField id="f_prod_g" label="Weight (g)" name="weightGrams" defaultValue={editing?.weightGrams} type="number" min="0" step="any" />
-        <TextField id="f_prod_s" label="Stock" name="stock" defaultValue={editing?.stock} type="number" min="0" step="any" />
+        <TextField
+          id="f_prod_s"
+          label="Stock"
+          name="stock"
+          defaultValue={editing?.stock ?? (mayStock ? undefined : 0)}
+          type="number"
+          min="0"
+          step="any"
+          disabled={!mayStock}
+          title={mayStock ? undefined : t("Your role cannot change the stock.")}
+        />
         <TextField id="f_prod_l" label="Labor per gram (EGP)" name="labor" defaultValue={editing ? piastresToInput(editing.laborPiastres) : undefined} type="number" min="0" step="any" />
       </FormGrid>
       <div className="grid gap-4 sm:grid-cols-2">

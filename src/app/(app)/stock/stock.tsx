@@ -92,7 +92,7 @@ export function Stock({ items, requireStock, ar }: { items: Product[]; requireSt
                   </div>
                 </TableCell>
                 <TableCell>
-                  {can("products:edit") ? (
+                  {can("stock:edit") ? (
                     <Adjust
                       item={item}
                       disabled={busy}

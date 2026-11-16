@@ -329,6 +329,8 @@ export const EXACT: Record<string, string> = {
   "Search products": "ابحث في المنتجات",
   "Total pieces": "إجمالي القطع",
   "Change stock": "تعديل المخزون",
+  "Edit stock": "تعديل المخزون",
+  "Your role cannot change the stock.": "دورك لا يسمح بتعديل المخزون.",
   "Low stock": "مخزون قليل",
   "Not limited by stock": "غير مقيّد بالمخزون",
   "Stock added": "تمت إضافة المخزون",
