@@ -10,13 +10,15 @@ import { CountCards } from "@/components/count-cards";
 import { useProductFilters } from "@/components/product-filters";
 import { isRowClick } from "@/components/link-row";
 import { Confirm, Modal } from "@/components/modal";
-import { FormGrid, Intro, Note, SelectField, Status, TableCard, TextAreaField, TextField } from "@/components/parts";
+import { FormGrid, Intro, Note, SelectField, Status, TableCard, TextField } from "@/components/parts";
+import { RichTextEditor } from "@/components/rich-text";
 import { RowAction, RowActions, RowActionsSeparator } from "@/components/row-actions";
 import { toast } from "@/components/toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { api, errorMessage, readResponse } from "@/lib/api";
+import { descriptionForEditor, isHtmlDescription } from "@/lib/description";
 import { formatNumber, formatStamp } from "@/lib/format";
 import { formatEgp, parseEgpToPiastres, piastresToInput, totalLaborPiastres as totalLabor } from "@/lib/money";
 import { buildHref } from "@/lib/query";
@@ -203,8 +205,10 @@ export function Products({
         weightGrams,
         ...(editing ? {} : { stock }),
         laborPiastres: labor.piastres,
-        descriptionEn: text("descriptionEn"),
-        descriptionAr: text("descriptionAr"),
+        // The editor's HTML. On an edit a description is sent only when it was changed, so an
+        // older plain-text one is not rewritten as HTML by saving something else.
+        ...(editing && text("descriptionEn") === descriptionForEditor(editing.descriptionEn) ? {} : { descriptionEn: text("descriptionEn") }),
+        ...(editing && text("descriptionAr") === descriptionForEditor(editing.descriptionAr) ? {} : { descriptionAr: text("descriptionAr") }),
     };
     // A new product with a photo: the product first (its id is needed), then the photo.
     if (!editing && newPhoto) {
@@ -279,8 +283,9 @@ export function Products({
         <TextField id="f_prod_l" label="Labor per gram (EGP)" name="labor" defaultValue={editing ? piastresToInput(editing.laborPiastres) : undefined} type="number" min="0" step="any" />
       </FormGrid>
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextAreaField id="f_prod_de" label="Description (English)" name="descriptionEn" defaultValue={editing?.descriptionEn} maxLength={2000} />
-        <TextAreaField id="f_prod_da" label="Description (Arabic)" name="descriptionAr" defaultValue={editing?.descriptionAr} maxLength={2000} dir="rtl" />
+        {/* The article form's editor, without pictures: a product has its own photos. */}
+        <RichTextEditor label="Description (English)" name="descriptionEn" value={descriptionForEditor(editing?.descriptionEn ?? "")} images={false} />
+        <RichTextEditor label="Description (Arabic)" name="descriptionAr" value={descriptionForEditor(editing?.descriptionAr ?? "")} dir="rtl" images={false} />
       </div>
       {editing ? null : (
         <div className="flex flex-wrap items-center gap-3">
@@ -483,9 +488,18 @@ export function Products({
               ).map(([label, value, dir]) => (
                 <div key={label} className="col-span-2 min-w-0 rounded-lg bg-muted/60 px-3 py-2.5">
                   <dt className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase"><T>{label}</T></dt>
-                  <dd dir={dir} className={value ? "mt-0.5 whitespace-pre-line [overflow-wrap:anywhere]" : "mt-0.5 text-muted-foreground"}>
-                    {value || "—"}
-                  </dd>
+                  {isHtmlDescription(value) ? (
+                    // Written in the editor: the server cleaned this HTML before storing it.
+                    <dd
+                      dir={dir}
+                      className="mt-0.5 text-sm leading-relaxed [overflow-wrap:anywhere] [&_a]:text-primary [&_a]:underline [&_h2]:text-xl [&_h2]:font-semibold [&_h3]:text-lg [&_h3]:font-semibold [&_ol]:list-decimal [&_ol]:ps-5 [&_p]:mb-2 [&_ul]:list-disc [&_ul]:ps-5"
+                      dangerouslySetInnerHTML={{ __html: value }}
+                    />
+                  ) : (
+                    <dd dir={dir} className={value ? "mt-0.5 whitespace-pre-line [overflow-wrap:anywhere]" : "mt-0.5 text-muted-foreground"}>
+                      {value || "—"}
+                    </dd>
+                  )}
                 </div>
               ))}
             </dl>
