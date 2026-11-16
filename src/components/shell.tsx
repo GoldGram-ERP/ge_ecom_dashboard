@@ -90,7 +90,7 @@ const NAV: [string, string, [string, string, string, LucideIcon, string][]][] = 
       ["/catalog/types", "Product types", "أنواع المنتجات", Layers, "product_types"],
       ["/catalog/manufacturers", "Manufacturers", "المصنّعون", Factory, "manufacturers"],
       ["/catalog/products", "Products", "المنتجات", Package, "products"],
-      ["/stock", "Stock", "المخزون", Warehouse, "products"],
+      ["/stock", "Stock", "المخزون", Warehouse, "stock"],
       ["/cashback", "Cashback policies", "سياسات الاسترداد", Undo2, "cashback"],
       ["/discount-rules", "Discount rules", "قواعد الخصم", BadgePercent, "discount_rules"],
     ],
