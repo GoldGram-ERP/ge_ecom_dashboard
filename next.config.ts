@@ -1,7 +1,5 @@
 import type { NextConfig } from "next";
 
-const API_URL = (process.env.API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
-
 // Staff tool CSP: scripts and API calls only from this site, no plugins, no framing, no
 // <base> or form tricks. Next's inline bootstrap needs 'unsafe-inline'; dev also needs eval and
 // the hot-reload socket. https: images, styles and fonts keep the email preview identical.
@@ -43,7 +41,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // The browser only ever calls same-origin /api/...; Next forwards it to the backend,
+  // The browser only ever calls same-origin /api/...; src/proxy.ts forwards it to the backend,
   // so there is no CORS and the admin cookie stays first-party.
   // The outbox became part of the system logs; its old addresses still open the right screen.
   async redirects() {
@@ -51,9 +49,6 @@ const nextConfig: NextConfig = {
       { source: "/outbox", destination: "/logs", permanent: false },
       { source: "/outbox/:id", destination: "/logs/message/:id", permanent: false },
     ];
-  },
-  async rewrites() {
-    return [{ source: "/api/:path*", destination: `${API_URL}/api/:path*` }];
   },
 };
 

@@ -43,3 +43,8 @@ next-env.d.ts
 
 # local dev server log
 .run.log
+
+# Cloudflare (OpenNext)
+.open-next
+.wrangler
+.dev.vars

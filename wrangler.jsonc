@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "goldgram-ecom-dashboard",
+  "account_id": "7eef115c06c9f2a00efccb7b8e92ceb6",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-20",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "goldgram-ecom-dashboard" }],
+  "kv_namespaces": [{ "binding": "NEXT_INC_CACHE_KV", "id": "b0506afc4f234a42b3bbf994eaa40480" }],
+  "durable_objects": { "bindings": [{ "name": "NEXT_CACHE_DO_QUEUE", "class_name": "DOQueueHandler" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DOQueueHandler"] }],
+  "images": { "binding": "IMAGES" },
+  // Same values as on Vercel. PROXY_SHARED_SECRET is a Worker secret (wrangler secret put), never here.
+  "vars": { "API_URL": "https://backend.goldgram.eg", "SHOP_URL": "https://goldgram.eg" },
+  // No routes yet: the worker answers only on its workers.dev address until admin.goldgram.eg is switched.
+  "observability": { "enabled": true }
+}
